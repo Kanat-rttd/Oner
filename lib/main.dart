@@ -1,19 +1,19 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:oner/screens/account_screen.dart';
-import 'package:oner/screens/home_screen.dart';
-import 'package:oner/screens/login_screen.dart';
-import 'package:oner/screens/pages/music.dart';
-import 'package:oner/screens/pages/parties.dart';
-import 'package:oner/screens/pages/paintings.dart';
-import 'package:oner/screens/pages/films.dart';
-import 'package:oner/screens/signup_screen.dart';
-import 'package:oner/screens/reset_password_screen.dart';
-import 'package:oner/screens/verify_email_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:oner/services/firebase_streem.dart';
+import 'package:oner/screens/bottom_navigation/account_screen.dart';
+import 'package:oner/screens/bottom_navigation/home_screen.dart';
+import 'package:oner/auth/login_screen.dart';
+import 'package:oner/screens/art_category_pages/music.dart';
+import 'package:oner/screens/art_category_pages/parties.dart';
+import 'package:oner/screens/art_category_pages/paintings.dart';
+import 'package:oner/screens/art_category_pages/films.dart';
+import 'package:oner/auth/signup_screen.dart';
+import 'package:oner/auth/reset_password_screen.dart';
+import 'package:oner/auth/verify_email_screen.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:oner/firebase/firebase_streem.dart';
 
-import 'firebase_options.dart';
+import 'firebase/firebase_options.dart';
 
 // Firebase Авторизация - Сценарии:
 //    Войти - Почта / Пароль

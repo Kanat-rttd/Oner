@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:oner/screens/home_screen.dart';
-import 'package:oner/screens/verify_email_screen.dart';
+import 'package:oner/screens/bottom_navigation/home_screen.dart';
+import 'package:oner/auth/verify_email_screen.dart';
 
 class FirebaseStream extends StatelessWidget {
   const FirebaseStream({super.key});

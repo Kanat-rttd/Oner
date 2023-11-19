@@ -28,8 +28,10 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_svg: ^2.0.5
   flutter:
     sdk: flutter
+  
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -63,9 +65,15 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg
+    # - assets/icons8-camera-50.png
+    - assets/photo-camera-svgrepo-com.svg
+    - assets/user.svg
+    - assets/settings.svg
+    - assets/help.svg
+    - assets/loved-post.svg
+    - assets/logout.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
