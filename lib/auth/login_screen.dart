@@ -45,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print(e.code);
 
       if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        // ignore: use_build_context_synchronously
         SnackBarService.showSnackBar(
           context,
           'Неправильный email или пароль. Повторите попытку',
@@ -52,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         return;
       } else {
+        // ignore: use_build_context_synchronously
         SnackBarService.showSnackBar(
           context,
           'Неизвестная ошибка! Попробуйте еще раз или обратитесь в поддержку.',
@@ -77,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           key: formKey,
           child: Column(
             children: [
+              //email
               TextFormField(
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
@@ -85,12 +88,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     email != null && !EmailValidator.validate(email)
                         ? 'Введите правильный Email'
                         : null,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.deepPurple),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                   hintText: 'Введите Email',
+                  fillColor: Colors.grey[200],
+                  filled: true,
                 ),
               ),
               const SizedBox(height: 30),
+
+              //password
               TextFormField(
                 autocorrect: false,
                 controller: passwordTextInputController,
@@ -100,8 +114,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     : null,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.deepPurple),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                   hintText: 'Введите пароль',
+                  fillColor: Colors.grey[200],
+                  filled: true,
                   suffix: InkWell(
                     onTap: togglePasswordView,
                     child: Icon(
@@ -114,11 +137,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 30),
+
+              //login button
               ElevatedButton(
                 onPressed: login,
                 child: const Center(child: Text('Войти')),
               ),
               const SizedBox(height: 30),
+
+
               TextButton(
                 onPressed: () => Navigator.of(context).pushNamed('/signup'),
                 child: const Text(
@@ -128,6 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+
+              
               TextButton(
                 onPressed: () =>
                     Navigator.of(context).pushNamed('/reset_password'),

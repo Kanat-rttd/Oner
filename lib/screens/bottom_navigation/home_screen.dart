@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:oner/auth/signup_screen.dart';
 import 'package:oner/screens/bottom_navigation/main_page.dart';
-import 'package:oner/screens/bottom_navigation/message_screen.dart';
+// import 'package:oner/screens/bottom_navigation/message_screen.dart';
 import 'package:oner/screens/bottom_navigation/account_screen.dart';
 // import 'package:oner/screens/account_screen.dart';
 // import 'package:oner/screens/login_screen.dart';
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List _pages = [
     const MainPage(),
 
-    const MessageScreen(),
+    const SignUpScreen(),
 
     const AccountScreen(),
 
@@ -69,17 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.blue,
           ),
         ],
-        // onTap: (index) {
-        //   if (index == 2) {
-        //     if (user == null) {
-        //       _showRegistrationDialog(context);
-        //     } else {
-        //       Navigator.pushReplacementNamed(context, '/account');
-        //     }
-        //   } else {
-        //     // Добавка по ролям на будущее
-        //   }
-        // },
       ),
     );
   }
