@@ -34,6 +34,7 @@ class Body extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
+          const SizedBox(height: 20),
           const ProfilePic(),
           const SizedBox(height: 20),
           ProfileMenu(
