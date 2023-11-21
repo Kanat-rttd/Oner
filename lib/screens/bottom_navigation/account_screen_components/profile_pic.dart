@@ -21,6 +21,7 @@ class ProfilePic extends StatefulWidget {
 class _ProfilePicState extends State<ProfilePic> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -29,6 +30,10 @@ class _ProfilePicState extends State<ProfilePic> {
   }
 
   Future<void> _loadImage() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final user = FirebaseAuth.instance.currentUser;
       final docSnapshot = await FirebaseFirestore.instance
@@ -39,7 +44,6 @@ class _ProfilePicState extends State<ProfilePic> {
       if (docSnapshot.exists) {
         final imageUrl = docSnapshot.get('avatarUrl');
         if (imageUrl != null && imageUrl.isNotEmpty) {
-          // Load image from network
           final imageFile = await _loadImageFromNetwork(imageUrl);
           if (imageFile != null) {
             setState(() {
@@ -50,6 +54,11 @@ class _ProfilePicState extends State<ProfilePic> {
       }
     } catch (e) {
       print('Ошибка при загрузке изображения: $e');
+      _showErrorSnackbar('Ошибка при загрузке изображения');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -64,6 +73,7 @@ class _ProfilePicState extends State<ProfilePic> {
       }
     } catch (e) {
       print('Ошибка при загрузке изображения из сети: $e');
+      _showErrorSnackbar('Ошибка при загрузке изображения из сети');
     }
     return null;
   }
@@ -79,6 +89,8 @@ class _ProfilePicState extends State<ProfilePic> {
 
       if (pickedFile != null) {
         setState(() {
+          _isLoading =
+              true; // Показываем анимацию загрузки при выборе нового изображения
           _image = File(pickedFile.path);
         });
 
@@ -89,6 +101,12 @@ class _ProfilePicState extends State<ProfilePic> {
       }
     } catch (e) {
       print('Ошибка при выборе изображения: $e');
+      _showErrorSnackbar('Ошибка при выборе изображения');
+    } finally {
+      setState(() {
+        _isLoading =
+            false; // Скрываем анимацию загрузки после завершения выбора изображения
+      });
     }
   }
 
@@ -101,26 +119,43 @@ class _ProfilePicState extends State<ProfilePic> {
       await storageReference.putFile(image);
       final downloadUrl = await storageReference.getDownloadURL();
 
-      // Получение ссылки на документ пользователя
       final userDoc =
           FirebaseFirestore.instance.collection('users').doc(user?.uid);
 
-      // Проверка на существование документа
       final userDocSnapshot = await userDoc.get();
 
       if (userDocSnapshot.exists) {
-        // Если документ существует, обновите его с новым URL изображения
         await userDoc.update({'avatarUrl': downloadUrl});
       } else {
-        // Если документ не существует, создайте его с новым URL изображения
         await userDoc.set({'avatarUrl': downloadUrl});
       }
 
       print('Firestore обновлен с URL изображения: $downloadUrl');
+      _showSuccessSnackbar('Изображение профиля успешно обновлено');
     } catch (e) {
       print(
           'Ошибка при загрузке изображения в Firebase Storage или обновлении Firestore: $e');
+      _showErrorSnackbar(
+          'Ошибка при загрузке изображения или обновлении Firestore');
     }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccessSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
@@ -139,6 +174,10 @@ class _ProfilePicState extends State<ProfilePic> {
                         'assets/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg')
                     as ImageProvider,
           ),
+          if (_isLoading)
+            Center(
+              child: CircularProgressIndicator(),
+            ),
           Positioned(
             right: -10,
             bottom: 0,
@@ -153,7 +192,7 @@ class _ProfilePicState extends State<ProfilePic> {
                     side: const BorderSide(color: Colors.white),
                   ),
                 ),
-                onPressed: _handleImageSelection,
+                onPressed: _isLoading ? null : _handleImageSelection,
                 child: SvgPicture.asset("assets/photo-camera-svgrepo-com.svg"),
               ),
             ),
