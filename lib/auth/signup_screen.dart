@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+// import 'package:oner/firebase.dart';
+// import 'package:oner/services/users_data.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
@@ -59,10 +61,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     try {
       //create user with email and password
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential = 
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextInputController.text.trim(),
         password: passwordTextInputController.text.trim(),
       );
+
+      // adding user info into firebase
+    FirebaseFirestore.instance
+        .collection('user_info')
+        .doc(userCredential.user!.email)
+        .set({
+      'Имя': firstNameController.text,
+      'Фамилия': lastNameController.text,
+      'Номер_телефона': phoneNumberController.text,
+      'email': emailTextInputController.text,
+        });
+
+      await FirebaseAuth.instance.currentUser!.updateDisplayName(
+      firstNameController.text.trim(),
+    );
 
       DatabaseReference userRef = FirebaseDatabase.instance.reference().child('users');
       String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -92,25 +110,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     //add user detais
-      addUserDetails(
-        firstNameController.text.trim(),
-        lastNameController.text.trim(),
-        emailTextInputController.text.trim(),
-        int.parse(phoneNumberController.text.trim()),
-      );
+      // addUserDetails(
+      //   firstNameController.text.trim(),
+      //   lastNameController.text.trim(),
+      //   emailTextInputController.text.trim(),
+      //   int.parse(phoneNumberController.text.trim()),
+      // );
 
     navigator.pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   }
 
-  Future addUserDetails(
-    String firstName, String lastName, String email, int phoneNumber) async {
-    await FirebaseFirestore.instance.collection('additional_user_info').add({
-      'first name': firstName,
-      'last name': lastName,
-      'email': email,
-      'phone number': phoneNumber,
-    });
-  }
+  // Future addUserDetails(
+  //   String firstName, String lastName, String email, int phoneNumber) async {
+  //   await FirebaseFirestore.instance.collection('additional_user_info').add({
+  //     'first_name': firstName,
+  //     'last_name': lastName,
+  //     'email': email,
+  //     'phone_number': phoneNumber,
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {

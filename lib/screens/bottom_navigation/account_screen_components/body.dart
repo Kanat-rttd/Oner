@@ -4,7 +4,9 @@ import 'package:oner/screens/bottom_navigation/account_screen_components/profile
 import 'package:oner/screens/bottom_navigation/account_screen_components/profile_pic.dart';
 
 class Body extends StatelessWidget {
-  const Body({Key? key});
+  final String? firstName;
+
+  const Body({Key? key, this.firstName}) : super(key: key);
 
   Future<void> _showLogoutDialog(BuildContext context) async {
     return showDialog(
@@ -37,10 +39,13 @@ class Body extends StatelessWidget {
           const SizedBox(height: 20),
           const ProfilePic(),
           const SizedBox(height: 20),
+
           ProfileMenu(
             icon: "assets/user.svg",
             text: "Мой Аккаунт",
-            press: () {},
+            press: () {
+              Navigator.pushNamed(context, '/editProfile');
+            },
           ),
           ProfileMenu(
             icon: "assets/loved-post.svg",

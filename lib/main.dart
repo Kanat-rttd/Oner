@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:oner/mypage/edit_profile.dart';
 import 'package:oner/screens/bottom_navigation/account_screen.dart';
 import 'package:oner/screens/bottom_navigation/home_screen.dart';
 import 'package:oner/auth/login_screen.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
         '/parties': (context) => const PartiesPage(),
         '/paintings': (context) => const PaintingsPage(),
         '/films': (context) => const FilmsPage(),
+        '/editProfile':(context) => const ProfileEditPage(),
       },
       initialRoute: '/',
     );
