@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+
 // import 'package:oner/firebase.dart';
 // import 'package:oner/services/users_data.dart';
+enum UserRole { Artist, NonArtist }
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key});
@@ -17,7 +19,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isHiddenPassword = true;
   TextEditingController emailTextInputController = TextEditingController();
   TextEditingController passwordTextInputController = TextEditingController();
-  TextEditingController passwordTextRepeatInputController = TextEditingController();
+  TextEditingController passwordTextRepeatInputController =
+      TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
@@ -61,28 +64,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     try {
       //create user with email and password
-      UserCredential userCredential = 
+      UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextInputController.text.trim(),
         password: passwordTextInputController.text.trim(),
       );
 
       // adding user info into firebase
-    FirebaseFirestore.instance
-        .collection('user_info')
-        .doc(userCredential.user!.email)
-        .set({
-      'Имя': firstNameController.text,
-      'Фамилия': lastNameController.text,
-      'Номер_телефона': phoneNumberController.text,
-      'email': emailTextInputController.text,
-        });
+      FirebaseFirestore.instance
+          .collection('user_info')
+          .doc(userCredential.user!.email)
+          .set({
+        'Имя': firstNameController.text,
+        'Фамилия': lastNameController.text,
+        'Номер_телефона': phoneNumberController.text,
+        'email': emailTextInputController.text,
+        'role': selectedRole == 'Артист'
+            ? UserRole.Artist.toString()
+            : UserRole.NonArtist.toString(),
+      });
 
       await FirebaseAuth.instance.currentUser!.updateDisplayName(
-      firstNameController.text.trim(),
-    );
+        firstNameController.text.trim(),
+      );
 
-      DatabaseReference userRef = FirebaseDatabase.instance.reference().child('users');
+      DatabaseReference userRef =
+          FirebaseDatabase.instance.reference().child('users');
       String uid = FirebaseAuth.instance.currentUser!.uid;
       userRef.child(uid).set({
         'email': emailTextInputController.text.trim(),
@@ -110,12 +117,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     //add user detais
-      // addUserDetails(
-      //   firstNameController.text.trim(),
-      //   lastNameController.text.trim(),
-      //   emailTextInputController.text.trim(),
-      //   int.parse(phoneNumberController.text.trim()),
-      // );
+    // addUserDetails(
+    //   firstNameController.text.trim(),
+    //   lastNameController.text.trim(),
+    //   emailTextInputController.text.trim(),
+    //   int.parse(phoneNumberController.text.trim()),
+    // );
 
     navigator.pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   }
@@ -137,8 +144,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         title: const Text(
           'Зарегистрироваться',
-          
-          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -147,7 +153,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             key: formKey,
             child: Column(
               children: [
-
                 //email
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -175,7 +180,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-      
+
                 //password
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -212,7 +217,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-      
+
                 //second pasword
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -249,7 +254,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-      
+
                 //first name
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -321,7 +326,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-      
+
                 //role
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -354,16 +359,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-      
+
                 //sign up button
                 ElevatedButton(
                   onPressed: signUp,
-                  child: const Center(child: Text(
+                  child: const Center(
+                      child: Text(
                     'Регистрация',
                     style: TextStyle(
                       fontSize: 18,
                     ),
-                    )),
+                  )),
                 ),
                 const SizedBox(height: 30),
                 // TextButton(

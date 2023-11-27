@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class ProfilePic extends StatefulWidget {
   const ProfilePic({
@@ -64,12 +65,19 @@ class _ProfilePicState extends State<ProfilePic> {
 
   Future<File?> _loadImageFromNetwork(String imageUrl) async {
     try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final savedFile = File('${appDir.path}/profile_avatar.jpg');
+
+      // Проверяем, есть ли сохраненное изображение
+      if (savedFile.existsSync()) {
+        return savedFile;
+      }
+
+      // Иначе, загружаем изображение из сети
       final response = await http.get(Uri.parse(imageUrl));
       if (response.statusCode == 200) {
-        final tempDir = await getTemporaryDirectory();
-        final file = File('${tempDir.path}/temp_avatar.jpg');
-        await file.writeAsBytes(response.bodyBytes);
-        return file;
+        await savedFile.writeAsBytes(response.bodyBytes);
+        return savedFile;
       }
     } catch (e) {
       print('Ошибка при загрузке изображения из сети: $e');
@@ -89,24 +97,48 @@ class _ProfilePicState extends State<ProfilePic> {
 
       if (pickedFile != null) {
         setState(() {
-          _isLoading =
-              true; // Показываем анимацию загрузки при выборе нового изображения
+          _isLoading = true;
           _image = File(pickedFile.path);
         });
 
-        await _saveImage(_image!);
+        // Сжимаем изображение перед загрузкой
+        final compressedImage = await _compressAndSaveImage(_image!);
 
-        // Upload image to Firebase Storage and update Firestore
-        await _uploadImageToFirebaseStorage(_image!);
+        if (compressedImage != null) {
+          // Сохраняем сжатое изображение
+          await _saveImage(compressedImage as File);
+
+          // Upload image to Firebase Storage and update Firestore
+          await _uploadImageToFirebaseStorage(compressedImage as File);
+        }
       }
     } catch (e) {
       print('Ошибка при выборе изображения: $e');
       _showErrorSnackbar('Ошибка при выборе изображения');
     } finally {
       setState(() {
-        _isLoading =
-            false; // Скрываем анимацию загрузки после завершения выбора изображения
+        _isLoading = false;
       });
+    }
+  }
+
+  Future<XFile?> _compressAndSaveImage(File originalImage) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final compressedFile = File('${appDir.path}/compressed_avatar.jpg');
+
+    try {
+      final int quality = 80; // Уровень качества (0 - 100)
+      final result = await FlutterImageCompress.compressAndGetFile(
+        originalImage.path,
+        compressedFile.path,
+        quality: quality,
+      );
+
+      return result;
+    } catch (e) {
+      print('Ошибка при сжатии изображения: $e');
+      _showErrorSnackbar('Ошибка при сжатии изображения');
+      return null;
     }
   }
 
@@ -146,7 +178,7 @@ class _ProfilePicState extends State<ProfilePic> {
         content: Text(message),
         backgroundColor: Colors.red,
       ),
-    );
+    );  
   }
 
   void _showSuccessSnackbar(String message) {
