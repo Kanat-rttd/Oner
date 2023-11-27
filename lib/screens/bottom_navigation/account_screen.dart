@@ -32,7 +32,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Приветствуем, ' + userData['Имя']
+                    'Приветствуем, ' + userData['firstName']
                   )
                 ],
               );

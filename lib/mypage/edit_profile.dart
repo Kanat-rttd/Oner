@@ -25,14 +25,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
         title: Text(
-          'Изменить $field',
+          'Изменить значение',
           style: const TextStyle(color: Colors.white),
         ),
         content: TextField(
           autofocus: true,
           style: TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            hintText: 'Введите новое $field',
+            hintText: 'Введите новое значение',
             hintStyle: TextStyle(color: Colors.white),
           ),
           onChanged: (value) {
@@ -104,23 +104,23 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
                   //firstname
                     MyTextBox(
-                      text: userData['Имя'],
+                      text: userData['firstName'],
                       sectionName: 'Имя',
-                      onPressed: () => editField("Имя"),
+                      onPressed: () => editField("firstName"),
                     ),
 
                   //lastname
                     MyTextBox(
-                      text: userData['Фамилия'],
+                      text: userData['lastName'],
                       sectionName: 'Фамилия',
-                      onPressed: () => editField("Фамилия"),
+                      onPressed: () => editField("lastName"),
                     ),
                   
                   //phone number
                     MyTextBox(
-                      text: userData['Номер_телефона'],
+                      text: userData['phoneNumber'],
                       sectionName: 'Номер телефона',
-                      onPressed: () => editField("Номер_телефона"),
+                      onPressed: () => editField("phoneNumber"),
                     ),
                 ],
               );

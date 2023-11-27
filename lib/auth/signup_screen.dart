@@ -79,9 +79,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           .collection('user_info')
           .doc(userCredential.user!.email)
           .set({
-        'Имя': firstNameController.text,
-        'Фамилия': lastNameController.text,
-        'Номер_телефона': phoneNumberController.text,
+        'firstName': firstNameController.text,
+        'lastName': lastNameController.text,
+        'phoneNumber': phoneNumberController.text,
         'email': emailTextInputController.text,
         'role': isArtist
             ? UserRole.Artist.toString()
