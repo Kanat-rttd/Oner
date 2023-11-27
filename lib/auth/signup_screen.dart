@@ -4,8 +4,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 
-// import 'package:oner/firebase.dart';
-// import 'package:oner/services/users_data.dart';
 enum UserRole { Artist, NonArtist }
 
 class SignUpScreen extends StatefulWidget {
@@ -17,6 +15,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   bool isHiddenPassword = true;
+  bool isArtist = false;
   TextEditingController emailTextInputController = TextEditingController();
   TextEditingController passwordTextInputController = TextEditingController();
   TextEditingController passwordTextRepeatInputController =
@@ -25,7 +24,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  String selectedRole = 'Артист';
   List<String> roles = ['Артист', 'Не артист'];
 
   @override
@@ -43,6 +41,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void togglePasswordView() {
     setState(() {
       isHiddenPassword = !isHiddenPassword;
+    });
+  }
+
+  void toggleRole() {
+    setState(() {
+      isArtist = !isArtist;
     });
   }
 
@@ -79,7 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'Фамилия': lastNameController.text,
         'Номер_телефона': phoneNumberController.text,
         'email': emailTextInputController.text,
-        'role': selectedRole == 'Артист'
+        'role': isArtist
             ? UserRole.Artist.toString()
             : UserRole.NonArtist.toString(),
       });
@@ -93,13 +97,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       userRef.child(uid).set({
         'email': emailTextInputController.text.trim(),
-        'role': selectedRole,
+        'role': isArtist ? 'Артист' : 'Не артист',
       });
     } on FirebaseAuthException catch (e) {
       print(e.code);
 
       if (e.code == 'email-already-in-use') {
-        // ignore: use_build_context_synchronously
         SnackBarService.showSnackBar(
           context,
           'Такой Email уже используется, повторите попытку с использованием другого Email',
@@ -107,7 +110,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
         return;
       } else {
-        // ignore: use_build_context_synchronously
         SnackBarService.showSnackBar(
           context,
           'Неизвестная ошибка! Попробуйте еще раз или обратитесь в поддержку.',
@@ -116,26 +118,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
 
-    //add user detais
-    // addUserDetails(
-    //   firstNameController.text.trim(),
-    //   lastNameController.text.trim(),
-    //   emailTextInputController.text.trim(),
-    //   int.parse(phoneNumberController.text.trim()),
-    // );
-
     navigator.pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   }
-
-  // Future addUserDetails(
-  //   String firstName, String lastName, String email, int phoneNumber) async {
-  //   await FirebaseFirestore.instance.collection('additional_user_info').add({
-  //     'first_name': firstName,
-  //     'last_name': lastName,
-  //     'email': email,
-  //     'phone_number': phoneNumber,
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +202,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                //second pasword
+                //second password
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -330,32 +314,75 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 //role
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedRole,
-                    items: roles.map((role) {
-                      return DropdownMenuItem<String>(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRole = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white),
-                        borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Выберите роль:',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Роль'),
+                                    content: Text(
+                                      'Если вы человек искусства, то выберите "Артист". Если нет, выберите "Не артист".',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: Icon(Icons.info_outline),
+                            tooltip: 'Информация о роли',
+                          ),
+                        ],
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.deepPurple),
-                        borderRadius: BorderRadius.circular(12),
+                      DropdownButtonFormField<String>(
+                        value: isArtist ? 'Артист' : 'Не артист',
+                        items: roles.map((role) {
+                          return DropdownMenuItem<String>(
+                            value: role,
+                            child: Text(role),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            isArtist = value == 'Артист';
+                          });
+                        },
+                        decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.white),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.deepPurple),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          hintText: 'Выберите роль',
+                          fillColor: Colors.grey[200],
+                          filled: true,
+                        ),
                       ),
-                      hintText: 'Выберите роль',
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                    ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -372,15 +399,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   )),
                 ),
                 const SizedBox(height: 30),
-                // TextButton(
-                //   onPressed: () => Navigator.of(context).pop(),
-                //   child: const Text(
-                //     'Войти',
-                //     style: TextStyle(
-                //       decoration: TextDecoration.underline,
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
