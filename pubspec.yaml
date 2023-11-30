@@ -48,6 +48,7 @@ dependencies:
   http: ^1.1.0
   path_provider: ^2.1.1
   flutter_image_compress: ^2.1.0
+  provider:
   
 
 dev_dependencies:

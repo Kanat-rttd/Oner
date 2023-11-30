@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:oner/mypage/additional/textbox.dart';
+import 'package:oner/additional/textbox.dart';
 
 
 class ProfileEditPage extends StatefulWidget {
@@ -82,7 +82,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       body: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
             .collection('user_info')
-            .doc(currentUser.email)
+            .doc(currentUser.uid)
             .snapshots(),
           builder: (context, snapshot) {
             //get user data

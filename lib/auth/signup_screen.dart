@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+// import 'package:provider/provider.dart';
 
 enum UserRole { Artist, NonArtist }
 
@@ -18,8 +19,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isArtist = false;
   TextEditingController emailTextInputController = TextEditingController();
   TextEditingController passwordTextInputController = TextEditingController();
-  TextEditingController passwordTextRepeatInputController =
-      TextEditingController();
+  TextEditingController passwordTextRepeatInputController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
@@ -51,6 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> signUp() async {
+    // final authService = Provider.of<AuthService>(context, listen: false);
     final navigator = Navigator.of(context);
 
     final isValid = formKey.currentState!.validate();
@@ -77,8 +78,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // adding user info into firebase
       FirebaseFirestore.instance
           .collection('user_info')
-          .doc(userCredential.user!.email)
+          .doc(userCredential.user!.uid)
           .set({
+        'uid': userCredential.user!.uid,
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
         'phoneNumber': phoneNumberController.text,

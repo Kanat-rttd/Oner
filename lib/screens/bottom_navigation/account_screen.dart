@@ -21,7 +21,7 @@ class _AccountScreenState extends State<AccountScreen> {
         title: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
             .collection('user_info')
-            .doc(currentUser.email)
+            .doc(currentUser.uid)
             .snapshots(),
           builder: (context, snapshot) {
             //get user data
