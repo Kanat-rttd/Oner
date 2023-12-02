@@ -68,7 +68,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
     //update changes on Firestore
     if (newValue.trim().length > 0) {
-      await userCollection.doc(currentUser.email).update({field: newValue});
+      await userCollection.doc(currentUser.uid).update({field: newValue});
     }
   }
 
