@@ -66,6 +66,7 @@ class _ProfilePicState extends State<ProfilePic> {
         if (imageUrl != null && imageUrl.isNotEmpty) {
           final imageFile = await _loadImageFromNetwork(imageUrl);
           if (imageFile != null) {
+            context.read<AvatarProvider>().clearAvatar();
             context.read<AvatarProvider>().setAvatar(imageFile);
           }
         }
@@ -78,6 +79,7 @@ class _ProfilePicState extends State<ProfilePic> {
   }
 
   Future<File?> _loadImageFromNetwork(String imageUrl) async {
+    context.read<AvatarProvider>().clearAvatar();
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final savedFile = File('${appDir.path}/profile_avatar.jpg');
@@ -94,12 +96,14 @@ class _ProfilePicState extends State<ProfilePic> {
     } catch (e) {
       _handleError('Ошибка при загрузке изображения из сети: $e');
     }
+
     return null;
   }
 
   Future<void> _saveImage(File image) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('profile_image', image.path);
+    context.read<AvatarProvider>().clearAvatar();
     context.read<AvatarProvider>().setAvatar(image);
   }
 
@@ -112,10 +116,9 @@ class _ProfilePicState extends State<ProfilePic> {
           _isLoading = true;
         });
         // Очищаем аватар после успешной загрузки нового изображения
-        context.read<AvatarProvider>().clearAvatar();
-
-        await _saveImage(File(pickedFile.path));
+        
         await _uploadImageToFirebaseStorage(File(pickedFile.path));
+        await _saveImage(File(pickedFile.path));
       }
     } catch (e) {
       _handleError('Ошибка при выборе изображения: $e');
