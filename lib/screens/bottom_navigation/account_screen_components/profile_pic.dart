@@ -23,16 +23,11 @@ class ProfilePic extends StatefulWidget {
 
 class _ProfilePicState extends State<ProfilePic> {
   final ImagePicker _picker = ImagePicker();
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Проверяем, был ли аватар уже загружен
-    final avatarProvider = context.read<AvatarProvider>();
-    if (avatarProvider.avatar == null) {
-      _loadImage();
-    }
+    _loadImage();
   }
 
   Future<File> _reduceImageSize(File image) async {
@@ -52,29 +47,37 @@ class _ProfilePicState extends State<ProfilePic> {
   }
 
   Future<void> _loadImage() async {
-    context.read<AvatarProvider>().setLoading(true);
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user?.uid)
-          .get();
+    if (isFirstTime) {
+      context.read<AvatarProvider>().setLoading(true);
 
-      if (docSnapshot.exists) {
-        final imageUrl = docSnapshot.get('avatarUrl');
-        if (imageUrl != null && imageUrl.isNotEmpty) {
-          final imageFile = await _loadImageFromNetwork(imageUrl);
-          if (imageFile != null) {
-            context.read<AvatarProvider>().clearAvatar();
-            context.read<AvatarProvider>().setAvatar(imageFile);
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user?.uid)
+            .get();
+
+        if (docSnapshot.exists) {
+          final imageUrl = docSnapshot.get('avatarUrl');
+          if (imageUrl != null && imageUrl.isNotEmpty) {
+            final imageFile = await _loadImageFromNetwork(imageUrl);
+            if (imageFile != null) {
+              context.read<AvatarProvider>().clearAvatar();
+              context.read<AvatarProvider>().setAvatar(imageFile);
+            }
           }
         }
+
+        // Устанавливаем флаг в false только при первом запуске приложения
+        prefs.setBool('isFirstTime', false);
+      } catch (e) {
+        _handleError('Ошибка при загрузке изображения: $e');
+      } finally {
+        context.read<AvatarProvider>().setLoading(false);
       }
-    } catch (e) {
-      _handleError('Ошибка при загрузке изображения: $e');
-    } finally {
-      context.read<AvatarProvider>().setLoading(false);
     }
   }
 
@@ -112,20 +115,16 @@ class _ProfilePicState extends State<ProfilePic> {
       final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
-        setState(() {
-          _isLoading = true;
-        });
+        setState(() {});
         // Очищаем аватар после успешной загрузки нового изображения
-        
+
         await _uploadImageToFirebaseStorage(File(pickedFile.path));
         await _saveImage(File(pickedFile.path));
       }
     } catch (e) {
       _handleError('Ошибка при выборе изображения: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() {});
     }
   }
 
@@ -192,7 +191,7 @@ class _ProfilePicState extends State<ProfilePic> {
                     as ImageProvider,
           ),
           if (isLoading)
-            Center(
+            const Center(
               child: CircularProgressIndicator(),
             ),
           Positioned(
