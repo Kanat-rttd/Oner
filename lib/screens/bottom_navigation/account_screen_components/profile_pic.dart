@@ -5,10 +5,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:oner/provider/avatar_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image/image.dart' as img;
 
 class ProfilePic extends StatefulWidget {
   const ProfilePic({
@@ -20,20 +22,37 @@ class ProfilePic extends StatefulWidget {
 }
 
 class _ProfilePicState extends State<ProfilePic> {
-  File? _image;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadImage();
+    // Проверяем, был ли аватар уже загружен
+    final avatarProvider = context.read<AvatarProvider>();
+    if (avatarProvider.avatar == null) {
+      _loadImage();
+    }
+  }
+
+  Future<File> _reduceImageSize(File image) async {
+    final decodedImage = img.decodeImage(await image.readAsBytes());
+
+    // Уменьшаем размер изображения до 200x200 пикселей
+    final resizedImage = img.copyResize(decodedImage!, width: 200, height: 200);
+
+    final tempDir = await getTemporaryDirectory();
+    final tempPath = tempDir.path;
+
+    // Создаем новый файл с уменьшенным изображением
+    final reducedImageFile = File('$tempPath/reduced_avatar.jpg')
+      ..writeAsBytesSync(img.encodeJpg(resizedImage));
+
+    return reducedImageFile;
   }
 
   Future<void> _loadImage() async {
-    setState(() {
-      _isLoading = true;
-    });
+    context.read<AvatarProvider>().setLoading(true);
 
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -47,19 +66,14 @@ class _ProfilePicState extends State<ProfilePic> {
         if (imageUrl != null && imageUrl.isNotEmpty) {
           final imageFile = await _loadImageFromNetwork(imageUrl);
           if (imageFile != null) {
-            setState(() {
-              _image = imageFile;
-            });
+            context.read<AvatarProvider>().setAvatar(imageFile);
           }
         }
       }
     } catch (e) {
-      print('Ошибка при загрузке изображения: $e');
-      _showErrorSnackbar('Ошибка при загрузке изображения');
+      _handleError('Ошибка при загрузке изображения: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      context.read<AvatarProvider>().setLoading(false);
     }
   }
 
@@ -68,20 +82,17 @@ class _ProfilePicState extends State<ProfilePic> {
       final appDir = await getApplicationDocumentsDirectory();
       final savedFile = File('${appDir.path}/profile_avatar.jpg');
 
-      // Проверяем, есть ли сохраненное изображение
       if (savedFile.existsSync()) {
         return savedFile;
       }
 
-      // Иначе, загружаем изображение из сети
       final response = await http.get(Uri.parse(imageUrl));
       if (response.statusCode == 200) {
         await savedFile.writeAsBytes(response.bodyBytes);
         return savedFile;
       }
     } catch (e) {
-      print('Ошибка при загрузке изображения из сети: $e');
-      _showErrorSnackbar('Ошибка при загрузке изображения из сети');
+      _handleError('Ошибка при загрузке изображения из сети: $e');
     }
     return null;
   }
@@ -89,6 +100,7 @@ class _ProfilePicState extends State<ProfilePic> {
   Future<void> _saveImage(File image) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('profile_image', image.path);
+    context.read<AvatarProvider>().setAvatar(image);
   }
 
   Future<void> _handleImageSelection() async {
@@ -98,23 +110,15 @@ class _ProfilePicState extends State<ProfilePic> {
       if (pickedFile != null) {
         setState(() {
           _isLoading = true;
-          _image = File(pickedFile.path);
         });
+        // Очищаем аватар после успешной загрузки нового изображения
+        context.read<AvatarProvider>().clearAvatar();
 
-        // Сжимаем изображение перед загрузкой
-        final compressedImage = await _compressAndSaveImage(_image!);
-
-        if (compressedImage != null) {
-          // Сохраняем сжатое изображение
-          await _saveImage(compressedImage as File);
-
-          // Upload image to Firebase Storage and update Firestore
-          await _uploadImageToFirebaseStorage(compressedImage as File);
-        }
+        await _saveImage(File(pickedFile.path));
+        await _uploadImageToFirebaseStorage(File(pickedFile.path));
       }
     } catch (e) {
-      print('Ошибка при выборе изображения: $e');
-      _showErrorSnackbar('Ошибка при выборе изображения');
+      _handleError('Ошибка при выборе изображения: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -122,33 +126,14 @@ class _ProfilePicState extends State<ProfilePic> {
     }
   }
 
-  Future<XFile?> _compressAndSaveImage(File originalImage) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final compressedFile = File('${appDir.path}/compressed_avatar.jpg');
-
-    try {
-      final int quality = 80; // Уровень качества (0 - 100)
-      final result = await FlutterImageCompress.compressAndGetFile(
-        originalImage.path,
-        compressedFile.path,
-        quality: quality,
-      );
-
-      return result;
-    } catch (e) {
-      print('Ошибка при сжатии изображения: $e');
-      _showErrorSnackbar('Ошибка при сжатии изображения');
-      return null;
-    }
-  }
-
   Future<void> _uploadImageToFirebaseStorage(File image) async {
     try {
+      final reducedImage = await _reduceImageSize(image);
       final user = FirebaseAuth.instance.currentUser;
       final fileName = 'avatar_${user?.uid}.jpg';
       final storageReference =
           FirebaseStorage.instance.ref().child('avatars/$fileName');
-      await storageReference.putFile(image);
+      await storageReference.putFile(reducedImage);
       final downloadUrl = await storageReference.getDownloadURL();
 
       final userDoc =
@@ -163,35 +148,32 @@ class _ProfilePicState extends State<ProfilePic> {
       }
 
       print('Firestore обновлен с URL изображения: $downloadUrl');
-      _showSuccessSnackbar('Изображение профиля успешно обновлено');
+      _showSnackbar('Изображение профиля успешно обновлено', Colors.green);
     } catch (e) {
-      print(
+      _handleError(
           'Ошибка при загрузке изображения в Firebase Storage или обновлении Firestore: $e');
-      _showErrorSnackbar(
-          'Ошибка при загрузке изображения или обновлении Firestore');
     }
   }
 
-  void _showErrorSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );  
+  void _handleError(String errorMessage) {
+    _showSnackbar(errorMessage, Colors.red);
   }
 
-  void _showSuccessSnackbar(String message) {
+  void _showSnackbar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: backgroundColor,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final avatarProvider = context.watch<AvatarProvider>();
+    final avatar = avatarProvider.avatar;
+    final isLoading = avatarProvider.loading;
+
     return SizedBox(
       height: 115,
       width: 115,
@@ -200,13 +182,13 @@ class _ProfilePicState extends State<ProfilePic> {
         clipBehavior: Clip.none,
         children: [
           CircleAvatar(
-            backgroundImage: _image != null
-                ? FileImage(_image!)
+            backgroundImage: avatar != null
+                ? FileImage(avatar)
                 : const AssetImage(
                         'assets/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg')
                     as ImageProvider,
           ),
-          if (_isLoading)
+          if (isLoading)
             Center(
               child: CircularProgressIndicator(),
             ),
@@ -224,7 +206,7 @@ class _ProfilePicState extends State<ProfilePic> {
                     side: const BorderSide(color: Colors.white),
                   ),
                 ),
-                onPressed: _isLoading ? null : _handleImageSelection,
+                onPressed: isLoading ? null : _handleImageSelection,
                 child: SvgPicture.asset("assets/photo-camera-svgrepo-com.svg"),
               ),
             ),

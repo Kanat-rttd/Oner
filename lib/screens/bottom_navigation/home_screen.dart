@@ -4,6 +4,7 @@ import 'package:oner/screens/bottom_navigation/main_page.dart';
 import 'package:oner/screens/bottom_navigation/account_screen.dart';
 import 'package:oner/screens/bottom_navigation/message_screen.dart';
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -98,3 +99,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
