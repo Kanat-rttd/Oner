@@ -24,14 +24,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text(
+        title: const Text(
           'Изменить значение',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white),
         ),
         content: TextField(
           autofocus: true,
-          style: TextStyle(color: Colors.white),
-          decoration: InputDecoration(
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
             hintText: 'Введите новое значение',
             hintStyle: TextStyle(color: Colors.white),
           ),
