@@ -52,14 +52,14 @@ class _MessageScreenState extends State<MessageScreen> {
     //displays all users except current user
     if(_auth.currentUser!.email != data['email']) {
       return ListTile(
-        title: Text(data['email']),
+        title: Text(data['firstName']),
         onTap: () {
           //pass the clicked user's uid to the chat page
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChatPage(
-                recieverUserEmail: data['email'],
+                recieverUserName: data['firstName'],
                 recieverUserID: data['uid'],
               ),
             ),

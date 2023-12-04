@@ -6,11 +6,11 @@ import 'package:oner/additional/textfield.dart';
 import 'package:oner/chat/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
-  final String recieverUserEmail;
+  final String recieverUserName;
   final String recieverUserID;
   const ChatPage({
     super.key,
-    required this.recieverUserEmail,
+    required this.recieverUserName,
     required this.recieverUserID,
   });
 
@@ -37,7 +37,7 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.recieverUserEmail)),
+      appBar: AppBar(title: Text(widget.recieverUserName)),
       body: Column(
         children: [
           //messages
@@ -94,7 +94,7 @@ class ChatPageState extends State<ChatPage> {
         crossAxisAlignment: (data['senderID'] == _firebaseAuth.currentUser!.uid) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         mainAxisAlignment: (data['senderID'] == _firebaseAuth.currentUser!.uid) ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          Text(data['senderEmail']),
+          Text(data['senderName']),
           const SizedBox(height: 5),
           ChatBubble(message: data['message']),
         ],
