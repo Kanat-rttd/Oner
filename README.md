@@ -7,7 +7,7 @@ An AMAZING FLUTTER PROJECT.
 
 This project is a masterpiece
 
-A few resources to get you started if this is your first Flutter project:
+Contact us:
 
 - [Beko-o's instagram](https://www.instagram.com/bekzat.mustafa/)
 - [Beko-o's LinkedIn](https://www.linkedin.com/in/bekzat-mustafa)
