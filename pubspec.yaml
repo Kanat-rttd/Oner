@@ -52,6 +52,7 @@ dependencies:
   provider: ^6.1.1
   image: ^4.1.3
   random_string: 
+  intl: ^0.18.1
   
 
 dev_dependencies:
