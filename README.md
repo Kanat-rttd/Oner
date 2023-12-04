@@ -1,20 +1,19 @@
 <<<<<<< HEAD
 # oner
 
-A new Flutter project.
+An AMAZING FLUTTER PROJECT.
 
-## Getting Started
+## ayou
 
-This project is a starting point for a Flutter application.
+This project is a masterpiece
 
 A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- [Beko-o's instagram](https://www.instagram.com/bekzat.mustafa/)
+- [Beko-o's LinkedIn](https://www.linkedin.com/in/bekzat-mustafa)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+For questions about project
+[Beko-o's telegram](t.me/seninbratanyn)
 =======
-# flutter_project
+# oner
 >>>>>>> a120f221f712411211f5000fccace18c28093f1c
