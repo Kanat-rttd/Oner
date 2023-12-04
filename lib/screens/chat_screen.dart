@@ -160,7 +160,7 @@ class ChatPageState extends State<ChatPage> {
   //build message input
   Widget _builMessageInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Row(
         children: [
           //textfield
