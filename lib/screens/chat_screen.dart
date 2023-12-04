@@ -23,12 +23,20 @@ class ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+  void replyToMessage(
+      String messageId, String senderEmail, String originalMessage) {
+    // Implement your reply logic here
+    print('Replying to message with ID: $messageId');
+    print('Sender: $senderEmail');
+    print('Original Message: $originalMessage');
+    // You can open a reply input or navigate to a new screen for the reply
+  }
+
   void sendMessage() async {
     //only send message if there is something to send
     if (_messageController.text.isNotEmpty) {
       await _chatService.sendMessage(
-        widget.recieverUserID, _messageController.text
-      );
+          widget.recieverUserID, _messageController.text);
       //clear the text controller after sending message
       _messageController.clear();
     }
@@ -42,7 +50,7 @@ class ChatPageState extends State<ChatPage> {
         children: [
           //messages
           Expanded(
-            child: _buildMessageList(), 
+            child: _buildMessageList(),
           ),
 
           //user input
@@ -58,9 +66,7 @@ class ChatPageState extends State<ChatPage> {
   Widget _buildMessageList() {
     return StreamBuilder(
       stream: _chatService.getMessages(
-        widget.recieverUserID,
-        _firebaseAuth.currentUser!.uid
-      ),
+          widget.recieverUserID, _firebaseAuth.currentUser!.uid),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text('Error${snapshot.error}');
@@ -72,8 +78,8 @@ class ChatPageState extends State<ChatPage> {
 
         return ListView(
           children: snapshot.data!.docs
-            .map((document) => _buildMessageItem(document))
-            .toList(),
+              .map((document) => _buildMessageItem(document))
+              .toList(),
         );
       },
     );
@@ -83,23 +89,72 @@ class ChatPageState extends State<ChatPage> {
   Widget _buildMessageItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-    //align the messages to the right if the sender is the current user, otherwise to the left
     var alignment = (data['senderID'] == _firebaseAuth.currentUser!.uid)
-    ? Alignment.centerRight
-    : Alignment.centerLeft;
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
 
-    return Container(
-      alignment: alignment,
-      child: Column(
-        crossAxisAlignment: (data['senderID'] == _firebaseAuth.currentUser!.uid) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        mainAxisAlignment: (data['senderID'] == _firebaseAuth.currentUser!.uid) ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          Text(data['senderEmail']),
-          const SizedBox(height: 5),
-          ChatBubble(message: data['message']),
-        ],
+    return Dismissible(
+      key: UniqueKey(), // Use UniqueKey for each Dismissible
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        color: Colors.green, // Customize swipe background color
+        child: Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Icon(
+            Icons.reply,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      onDismissed: (direction) {
+        // Handle swipe action (reply)
+        replyToMessage(
+          document.id,
+          data['senderEmail'],
+          data['message'],
+        );
+      },
+      child: GestureDetector(
+        onLongPress: () {
+          // Handle long-press action (reply)
+          replyToMessage(
+            document.id,
+            data['senderEmail'],
+            data['message'],
+          );
+        },
+        child: Container(
+          alignment: alignment,
+          child: Column(
+            crossAxisAlignment:
+                (data['senderID'] == _firebaseAuth.currentUser!.uid)
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+            mainAxisAlignment:
+                (data['senderID'] == _firebaseAuth.currentUser!.uid)
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.start,
+            children: [
+              Text(data['senderEmail']),
+              const SizedBox(height: 5),
+              ChatBubble(
+                message: data['message'],
+                time: _formatTimestamp(data['timestamp']),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+// Format timestamp to display time
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    String formattedTime =
+        '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+    return formattedTime;
   }
 
   //build message input
@@ -111,12 +166,11 @@ class ChatPageState extends State<ChatPage> {
           //textfield
           Expanded(
             child: MyTextField(
-              controller: _messageController,
-              hintText: 'Enter message',
-              obscureText: false
-            ), 
+                controller: _messageController,
+                hintText: 'Enter message',
+                obscureText: false),
           ),
-    
+
           //send button
           IconButton(
             onPressed: sendMessage,
