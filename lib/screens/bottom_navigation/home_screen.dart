@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List _pages = [
     const MainPage(),
 
-    const MessageScreen(),
+    MessageScreen(),
 
     const AccountScreen(),
 
