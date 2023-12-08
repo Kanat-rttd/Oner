@@ -6,12 +6,12 @@ import 'package:oner/additional/textfield.dart';
 import 'package:oner/chat/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
-  final String recieverUserName;
+  final String recieverUserEmail;
   final String recieverUserID;
   const ChatPage({
     super.key,
-    required this.recieverUserName,
-    required this.recieverUserID,
+    required this.recieverUserEmail,
+    required this.recieverUserID, required receiverUserEmail, required receiverUserID,
   });
 
   @override
@@ -45,7 +45,7 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.recieverUserName)),
+      appBar: AppBar(title: Text(widget.recieverUserEmail)),
       body: Column(
         children: [
           //messages
@@ -90,7 +90,7 @@ class ChatPageState extends State<ChatPage> {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
     var alignment = (data['senderID'] == _firebaseAuth.currentUser!.uid)
-    ? Alignment.centerRight
+        ? Alignment.centerRight
         : Alignment.centerLeft;
 
     return Dismissible(
@@ -111,7 +111,7 @@ class ChatPageState extends State<ChatPage> {
         // Handle swipe action (reply)
         replyToMessage(
           document.id,
-          data['senderName'],
+          data['senderEmail'],
           data['message'],
         );
       },
@@ -120,7 +120,7 @@ class ChatPageState extends State<ChatPage> {
           // Handle long-press action (reply)
           replyToMessage(
             document.id,
-            data['senderName'],
+            data['senderEmail'],
             data['message'],
           );
         },
@@ -136,7 +136,7 @@ class ChatPageState extends State<ChatPage> {
                     ? MainAxisAlignment.end
                     : MainAxisAlignment.start,
             children: [
-              Text(data['senderName']),
+              Text(data['senderEmail']),
               const SizedBox(height: 5),
               ChatBubble(
                 message: data['message'],
@@ -160,7 +160,7 @@ class ChatPageState extends State<ChatPage> {
   //build message input
   Widget _builMessageInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: Row(
         children: [
           //textfield
