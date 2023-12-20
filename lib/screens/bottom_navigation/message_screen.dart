@@ -3,9 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/chat_screen.dart';
 
-
 class MessageScreen extends StatefulWidget {
-  const MessageScreen({super.key});
+  const MessageScreen({Key? key});
 
   @override
   State<MessageScreen> createState() => _MessageScreenState();
@@ -13,6 +12,58 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Widget _buildUserList() {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance.collection('user_info').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Text('Error');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text('Loading...');
+        }
+
+        final List<Widget> userListItems = [];
+        final List<String> usersWithChats = [];
+
+        snapshot.data!.docs.forEach((doc) {
+          Map<String, dynamic> data = doc.data()as Map<String, dynamic>;
+          final String userEmail = data['email'];
+          final String userID = data['uid'];
+
+          if (_auth.currentUser!.email != userEmail) {
+            usersWithChats.add(userID);
+
+            userListItems.add(
+              ListTile(
+                title: Text(userEmail),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatPage(
+                        recieverUserEmail: userEmail,
+                        recieverUserID: userID,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        });
+
+        if (usersWithChats.isNotEmpty) {
+          return ListView(children: userListItems);
+        } else {
+          return const Center(child: Text('Пока нет чатов'));
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,53 +72,5 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
       body: _buildUserList(),
     );
-  }
-
-  //build a list of users except for current logged in user
-  Widget _buildUserList() {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('user_info').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('error');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('loading');
-        }
-
-        return ListView(
-          children: snapshot.data!.docs
-          .map<Widget>((doc) => _buildUserListItem(doc))
-          .toList(), 
-        );
-      },
-    );
-  }
-
-  //build individual user list items
-  Widget _buildUserListItem(DocumentSnapshot document) {
-    Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-
-    //displays all users except current user
-    if(_auth.currentUser!.email != data['email']) {
-      return ListTile(
-        title: Text(data['email']),
-        onTap: () {
-          //pass the clicked user's uid to the chat page
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatPage(
-                recieverUserEmail: data['email'],
-                recieverUserID: data['uid'],
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      return Container();
-    }
   }
 }
