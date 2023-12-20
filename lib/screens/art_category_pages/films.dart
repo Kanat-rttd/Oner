@@ -22,8 +22,6 @@ class _FilmsPageState extends State<FilmsPage> {
     blogsFutureFilms = crudMethodsFilms.getData();
   }
 
-  
-
   Widget blogListFilms() {
     return FutureBuilder(
       future: blogsFutureFilms,
@@ -136,194 +134,144 @@ class BlogsTile extends StatelessWidget {
           String authorNameFilms =
               '${userData['firstName']} ${userData['lastName']}';
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 300,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      imgUrlFilms,
-                      width: MediaQuery.of(context).size.width,
+          return SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
                       height: 300,
-                      fit: BoxFit.cover,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          imgUrlFilms,
+                          width: MediaQuery.of(context).size.width,
+                          height: 300,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.only(top: 10),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(top: 10),
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        titleFilms,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        descriptionFilms,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Автор: ${authorNameFilms}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      FutureBuilder(
-                        future: FirebaseFirestore.instance
-                            .collection('user_info')
-                            .doc(currentUser.uid)
-                            .get(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text(
-                                'Ошибка при получении данных: ${snapshot.error}');
-                          } else {
-                            Map<String, dynamic> userData =
-                                snapshot.data!.data() as Map<String, dynamic>;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: const Text(
-                                    "Контактные данные:",
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                                Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text(
-                                    "Номер телефона: ${userData['phoneNumber']}",
-                                    style: TextStyle(
-                                        fontSize: 17, color: Colors.grey[600]),
-                                  ),
-                                ),
-                                const Divider(
-                                  color: Colors.grey,
-                                  thickness: 1,
-                                  height: 1,
-                                ),
-                                Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text(
-                                    "Email: ${currentUser.email ?? 'Не указан'}",
-                                    style: TextStyle(
-                                        fontSize: 17, color: Colors.grey[600]),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      // Добавляем кнопку удаления
-                      FutureBuilder(
-                        future:
-                            CrudMethodsFilms().isAuthor(docId, currentUser.uid),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text(
-                                'Ошибка при проверке авторства: ${snapshot.error}');
-                          } else {
-                            bool isAuthor = snapshot.data as bool;
-
-                            if (isAuthor) {
-                              return ElevatedButton(
-                                onPressed: () async {
-                                  // Диалоговое окно подтверждения удаления
-                                  bool confirmDelete = await showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('Удаление поста'),
-                                        content: const Text(
-                                            'Вы точно хотите удалить пост?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                            child: const Text('Отмена'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(true);
-                                            },
-                                            child: const Text('Удалить'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-
-                                  // Если подтвердили удаление, удаляем пост
-                                  if (confirmDelete == true) {
-                                    await CrudMethodsFilms().deleteData(docId);
-                                    // Обновляем UI (например, перезагружаем страницу)
-                                    // setState(() {});
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              titleFilms,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              descriptionFilms,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Автор: ${authorNameFilms}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FutureBuilder(
+                              future:
+                                  CrudMethodsFilms().isAuthor(docId, currentUser.uid),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                      'Ошибка при проверке авторства: ${snapshot.error}');
+                                } else {
+                                  bool isAuthor = snapshot.data as bool;
+                                    
+                                  if (isAuthor) {
+                                    return ElevatedButton(
+                                      onPressed: () async {
+                                        // Диалоговое окно подтверждения удаления
+                                        bool confirmDelete = await showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: const Text('Удаление поста'),
+                                              content: const Text(
+                                                  'Вы точно хотите удалить пост?'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(false);
+                                                  },
+                                                  child: const Text('Отмена'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(true);
+                                                  },
+                                                  child: const Text('Удалить'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                    
+                                        // Если подтвердили удаление, удаляем пост
+                                        if (confirmDelete == true) {
+                                          await CrudMethodsFilms().deleteData(docId);
+                                          // Обновляем UI (например, перезагружаем страницу)
+                                        }
+                                      },
+                                      child: const Text('Удалить пост'),
+                                    );
+                                  } else {
+                                    return Container();
                                   }
-                                },
-                                child: const Text('Удалить пост'),
-                              );
-                            } else {
-                              return Container();
-                            }
-                          }
-                        },
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         }

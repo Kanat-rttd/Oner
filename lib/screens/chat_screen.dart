@@ -11,7 +11,7 @@ class ChatPage extends StatefulWidget {
   const ChatPage({
     super.key,
     required this.recieverUserEmail,
-    required this.recieverUserID, required receiverUserEmail, required receiverUserID,
+    required this.recieverUserID,
   });
 
   @override
