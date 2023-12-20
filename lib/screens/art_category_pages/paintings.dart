@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/art_category_pages/blog/create_blog_paintings.dart';
 import 'package:oner/screens/art_category_pages/blog/crud_paintings.dart';
+import 'package:oner/screens/chat_screen.dart';
 
 class PaintingsPage extends StatefulWidget {
   const PaintingsPage({super.key});
@@ -141,6 +142,8 @@ class BlogsTile extends StatelessWidget {
           String authorNamePaintings =
               '${userData['firstName']} ${userData['lastName']}';
 
+          bool isCurrentUserAuthor = currentUser.uid == authorID;
+
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
             child: Column(
@@ -159,14 +162,39 @@ class BlogsTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      imgUrlPaintings,
-                      width: MediaQuery.of(context).size.width,
-                      height: 300,
-                      fit: BoxFit.cover,
-                    ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          imgUrlPaintings,
+                          width: MediaQuery.of(context).size.width,
+                          height: 300,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      // IconButton for navigating to chat page
+                       if (!isCurrentUserAuthor)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: IconButton(
+                            icon: Icon(Icons.message),
+                            onPressed: () {
+                              // Navigate to chat page with the author
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    recieverUserEmail: userData['email'],
+                                    recieverUserID: authorID,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Container(

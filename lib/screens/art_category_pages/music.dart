@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/art_category_pages/blog/create_blog_music.dart';
 import 'package:oner/screens/art_category_pages/blog/crud_music.dart';
+import 'package:oner/screens/chat_screen.dart';
 
 class MusicPage extends StatefulWidget {
   const MusicPage({super.key});
@@ -34,8 +35,7 @@ class _MusicPageState extends State<MusicPage> {
         } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Text('Нет доступных блогов.');
         } else {
-          return Column(
-            children: <Widget>[
+          return
               ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: snapshot.data!.docs.length,
@@ -52,9 +52,8 @@ class _MusicPageState extends State<MusicPage> {
                     imgUrlMusic: snapshot.data!.docs[index]['imgUrlMusic'],
                   );
                 },
-              )
-            ],
-          );
+              );
+
         }
       },
     );
@@ -90,7 +89,7 @@ class _MusicPageState extends State<MusicPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(child: blogListMusic()),
+        child: blogListMusic(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -142,6 +141,8 @@ class BlogsTile extends StatelessWidget {
               snapshot.data!.data() as Map<String, dynamic>;
           String authorNameMusic =
               '${userData['firstName']} ${userData['lastName']}';
+              
+          bool isCurrentUserAuthor = currentUser.uid == authorID;
 
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -161,14 +162,39 @@ class BlogsTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      imgUrlMusic,
-                      width: MediaQuery.of(context).size.width,
-                      height: 300,
-                      fit: BoxFit.cover,
-                    ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          imgUrlMusic,
+                          width: MediaQuery.of(context).size.width,
+                          height: 300,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      // IconButton for navigating to chat page
+                       if (!isCurrentUserAuthor)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: IconButton(
+                            icon: Icon(Icons.message),
+                            onPressed: () {
+                              // Navigate to chat page with the author
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    recieverUserEmail: userData['email'],
+                                    recieverUserID: authorID,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Container(
@@ -266,7 +292,7 @@ class BlogsTile extends StatelessWidget {
                                   margin:
                                       const EdgeInsets.symmetric(vertical: 8),
                                   child: Text(
-                                    "Email: ${currentUser.email ?? 'Не указан'}",
+                                    "Email: ${userData['email'] ?? 'Не указан'}",
                                     style: TextStyle(
                                         fontSize: 17, color: Colors.grey[600]),
                                   ),
