@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/additional/chat_bubble.dart';
 import 'package:oner/additional/textfield.dart';
-import 'package:oner/chat/chat_service.dart';
+import 'package:oner/screens/bottom_navigation/chatting/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String recieverUserEmail;

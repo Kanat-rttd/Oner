@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:oner/screens/chat_screen.dart';
+import 'package:oner/screens/bottom_navigation/chatting/chat_screen.dart';
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({Key? key});
@@ -68,7 +68,8 @@ class _MessageScreenState extends State<MessageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Message Page'),
+        title: const Text('Сообщения'),
+        centerTitle: true,
       ),
       body: _buildUserList(),
     );

@@ -1,7 +1,7 @@
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:flutter/material.dart';
-  import 'package:oner/screens/bottom_navigation/account_screen_components/profile_menu.dart';
-  import 'package:oner/screens/bottom_navigation/account_screen_components/profile_pic.dart';
+  import 'package:oner/screens/bottom_navigation/my_page_screen/profile_menu.dart';
+  import 'package:oner/screens/bottom_navigation/my_page_screen/profile_pic.dart';
 
   class Body extends StatelessWidget {
     final String? firstName;
@@ -38,7 +38,7 @@
           children: [
             const SizedBox(height: 20),
             const ProfilePic(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 70),
 
             ProfileMenu(
               icon: "assets/user.svg",
@@ -50,17 +50,16 @@
             ProfileMenu(
               icon: "assets/loved-post.svg",
               text: "Мои посты",
-              press: () {},
-            ),
-            ProfileMenu(
-              icon: "assets/settings.svg",
-              text: "Настройки",
-              press: () {},
+              press: () {
+                Navigator.pushNamed(context, '/myPosts');
+              },
             ),
             ProfileMenu(
               icon: "assets/help.svg",
               text: "Помощь",
-              press: () {},
+              press: () {
+                Navigator.pushNamed(context, '/helpPage');
+              },
             ),
             ProfileMenu(
               icon: "assets/logout.svg",

@@ -3,18 +3,15 @@ import 'package:flutter/material.dart';
 // import 'package:oner/screens/home_screen.dart';
 // import 'package:oner/screens/profile/account_screen.dart';
 
-class MainPage extends StatelessWidget{
+class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) {
     // final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: _buildSearchField(),
-      ),
+      appBar: _buildAnimatedAppBar(context),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -26,34 +23,54 @@ class MainPage extends StatelessWidget{
         ),
       ),
     );
- }
+  }
 
+  // Widget _buildSearchField() {
+  //   return Container(
+  //     width: 300,
+  //     padding: const EdgeInsets.symmetric(horizontal: 10.0),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(20.0),
+  //     ),
+  //     child: const Row(
+  //       children: [
+  //         Expanded(
+  //           child: TextField(
+  //             decoration: InputDecoration(
+  //               hintText: '      Поиск по Oner',
+  //               border: InputBorder.none,
+  //             ),
+  //           ),
+  //         ),
+  //         SizedBox(width: 8),
+  //         Icon(Icons.search),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-Widget _buildSearchField() {
-    return Container(
-      width: 300,
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: const Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: '      Поиск по Oner',
-                border: InputBorder.none,
-              ),
-            ),
+  PreferredSizeWidget _buildAnimatedAppBar(BuildContext context) {
+    return AppBar(
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 0, 140, 255),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          SizedBox(width: 8),
-          Icon(Icons.search),
-        ],
+        ),
       ),
+      title: AnimatedTextWidget(
+        text: 'Твори историю искусства!',
+        textStyle: const TextStyle(color: Colors.white),
+        duration: const Duration(milliseconds: 500),
+      ),
+      centerTitle: true, // Add this line to center the title.
     );
   }
-  
 
   Widget _buildCenteredRoundedIcons(BuildContext context) {
     return Row(
@@ -117,5 +134,61 @@ Widget _buildSearchField() {
         Text(label),
       ],
     );
+  }
+}
+
+class AnimatedTextWidget extends StatefulWidget {
+  final String text;
+  final TextStyle textStyle;
+  final Duration duration;
+
+  AnimatedTextWidget({
+    required this.text,
+    required this.textStyle,
+    required this.duration,
+  });
+
+  @override
+  _AnimatedTextWidgetState createState() => _AnimatedTextWidgetState();
+}
+
+class _AnimatedTextWidgetState extends State<AnimatedTextWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<int> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+
+    _animation =
+        StepTween(begin: 0, end: widget.text.length).animate(_controller);
+
+    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final currentLength = _animation.value;
+        return Text(
+          widget.text.substring(0, currentLength),
+          style: widget.textStyle,
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

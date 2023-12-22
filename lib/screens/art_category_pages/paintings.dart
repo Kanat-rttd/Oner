@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/art_category_pages/blog/create_blog_paintings.dart';
 import 'package:oner/screens/art_category_pages/blog/crud_paintings.dart';
-import 'package:oner/screens/chat_screen.dart';
+import 'package:oner/screens/bottom_navigation/chatting/chat_screen.dart';
 
 class PaintingsPage extends StatefulWidget {
   const PaintingsPage({super.key});

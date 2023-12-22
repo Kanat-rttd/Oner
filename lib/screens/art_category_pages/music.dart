@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/art_category_pages/blog/create_blog_music.dart';
 import 'package:oner/screens/art_category_pages/blog/crud_music.dart';
-import 'package:oner/screens/chat_screen.dart';
+import 'package:oner/screens/bottom_navigation/chatting/chat_screen.dart';
 
 class MusicPage extends StatefulWidget {
   const MusicPage({super.key});

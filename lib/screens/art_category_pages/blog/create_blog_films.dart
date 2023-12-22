@@ -9,7 +9,11 @@ import 'dart:io';
 import 'package:random_string/random_string.dart';
 
 class CreateBlogFilms extends StatefulWidget {
-  const CreateBlogFilms({super.key});
+  final Map<String, dynamic>? initialData;
+  final String? docId;
+  final bool isEditing;
+
+  CreateBlogFilms({this.initialData, this.docId, this.isEditing = false});
 
   @override
   State<CreateBlogFilms> createState() => CreateBlogFilmsState();
@@ -24,6 +28,35 @@ class CreateBlogFilmsState extends State<CreateBlogFilms> {
 
   XFile? selectedImageFilms;
   bool isLoadingFilms = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize fields with provided data when editing
+    if (widget.isEditing && widget.initialData != null) {
+      filmUrl = widget.initialData!['filmUrl'] ?? '';
+      titleFilms = widget.initialData!['titleFilms'] ?? '';
+      descriptionFilms = widget.initialData!['descriptionFilms'] ?? '';
+      // ... Initialize other fields as needed ...
+    }
+  }
+
+  void _saveChangesAndPop() {
+  // Save changes and prepare updated data
+  Map<String, dynamic> updatedData = {
+    'filmUrl': filmUrl,
+    'titleFilms': titleFilms,
+    'descriptionFilms': descriptionFilms,
+    // ... Other fields ...
+  };
+
+  // If it's editing mode, pass the updated data back to the previous screen
+  if (widget.isEditing) {
+    Navigator.pop(context, updatedData);
+  } else {
+    // ... Your existing logic for saving a new post ...
+  }
+}
 
   CrudMethodsFilms crudMethodsFilms = CrudMethodsFilms();
 

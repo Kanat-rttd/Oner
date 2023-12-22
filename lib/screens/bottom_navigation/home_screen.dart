@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/bottom_navigation/main_page.dart';
-import 'package:oner/screens/bottom_navigation/account_screen.dart';
-import 'package:oner/screens/bottom_navigation/message_screen.dart';
+import 'package:oner/screens/bottom_navigation/my_page_screen/account_screen.dart';
+import 'package:oner/screens/bottom_navigation/chatting/message_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
