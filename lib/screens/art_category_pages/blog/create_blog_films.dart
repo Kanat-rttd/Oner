@@ -25,6 +25,8 @@ class CreateBlogFilmsState extends State<CreateBlogFilms> {
   String filmUrl = '';
   String titleFilms = '';
   String descriptionFilms = '';
+  String date = ''; // Add this line
+  String time = ''; // Add this line
 
   XFile? selectedImageFilms;
   bool isLoadingFilms = false;
@@ -40,23 +42,6 @@ class CreateBlogFilmsState extends State<CreateBlogFilms> {
       // ... Initialize other fields as needed ...
     }
   }
-
-  void _saveChangesAndPop() {
-  // Save changes and prepare updated data
-  Map<String, dynamic> updatedData = {
-    'filmUrl': filmUrl,
-    'titleFilms': titleFilms,
-    'descriptionFilms': descriptionFilms,
-    // ... Other fields ...
-  };
-
-  // If it's editing mode, pass the updated data back to the previous screen
-  if (widget.isEditing) {
-    Navigator.pop(context, updatedData);
-  } else {
-    // ... Your existing logic for saving a new post ...
-  }
-}
 
   CrudMethodsFilms crudMethodsFilms = CrudMethodsFilms();
 
@@ -75,6 +60,11 @@ class CreateBlogFilmsState extends State<CreateBlogFilms> {
       setState(() {
         isLoadingFilms = true;
       });
+
+      // Get current date and time
+      DateTime now = DateTime.now();
+      date = "${now.year}-${now.month}-${now.day}";
+      time = "${now.hour}:${now.minute}:${now.second}";
       //uploading image to firebase storage
       Reference firebasStorageRef = FirebaseStorage.instance
           .ref()
@@ -95,6 +85,8 @@ class CreateBlogFilmsState extends State<CreateBlogFilms> {
         'titleFilms': titleFilms,
         'descriptionFilms': descriptionFilms,
         'authorID': FirebaseAuth.instance.currentUser!.uid,
+        'date': date, // Add this line
+        'time': time, // Add this line
       };
 
       crudMethodsFilms.addData(blogMap).then((resultFilms) {

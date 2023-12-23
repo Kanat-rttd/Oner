@@ -19,6 +19,8 @@ class CreateBlogPartiesState extends State<CreateBlogParties> {
 
   String titleParties = '';
   String descriptionParties = '';
+  String date = ''; // Add this line
+  String time = ''; // Add this line
 
   XFile? selectedImageParties;
   bool isLoadingParties = false;
@@ -40,6 +42,11 @@ class CreateBlogPartiesState extends State<CreateBlogParties> {
       setState(() {
         isLoadingParties = true;
       });
+
+      // Get current date and time
+      DateTime now = DateTime.now();
+      date = "${now.year}-${now.month}-${now.day}";
+      time = "${now.hour}:${now.minute}:${now.second}";
       //uploading image to firebase storage
       Reference firebasStorageRef = FirebaseStorage.instance
           .ref()
@@ -60,6 +67,8 @@ class CreateBlogPartiesState extends State<CreateBlogParties> {
         'titleParties': titleParties,
         'descriptionParties': descriptionParties,
         'authorID': FirebaseAuth.instance.currentUser!.uid,
+        'date': date, // Add this line
+        'time': time, // Add this line
       };
 
       crudMethodsParties.addData(blogMap).then((resultParties) {

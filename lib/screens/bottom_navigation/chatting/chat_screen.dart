@@ -24,6 +24,7 @@ class ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final TextEditingController _replyController = TextEditingController();
+  // ignore: unused_field
   String _userName = '';
 
   @override

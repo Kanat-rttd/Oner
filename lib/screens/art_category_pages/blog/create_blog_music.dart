@@ -21,6 +21,8 @@ class CreateBlogMusicState extends State<CreateBlogMusic> {
   String musicUrl = '';
   String titleMusic = '';
   String descriptionMusic = '';
+   String date = ''; // Add this line
+  String time = ''; // Add this line
 
   XFile? selectedImageMusic;
   bool isLoadingMusic = false;
@@ -42,6 +44,11 @@ class CreateBlogMusicState extends State<CreateBlogMusic> {
       setState(() {
         isLoadingMusic = true;
       });
+
+      // Get current date and time
+      DateTime now = DateTime.now();
+      date = "${now.year}-${now.month}-${now.day}";
+      time = "${now.hour}:${now.minute}:${now.second}";
       //uploading image to firebase storage
       Reference firebasStorageRef = FirebaseStorage.instance
           .ref()
@@ -62,6 +69,8 @@ class CreateBlogMusicState extends State<CreateBlogMusic> {
         'titleMusic': titleMusic,
         'descriptionMusic': descriptionMusic,
         'authorID': FirebaseAuth.instance.currentUser!.uid,
+        'date': date, // Add this line
+        'time': time, // Add this line
       };
 
       crudMethodsMusic.addData(blogMap).then((resultMusic) {

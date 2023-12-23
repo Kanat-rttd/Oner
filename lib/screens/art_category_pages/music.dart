@@ -50,6 +50,8 @@ class _MusicPageState extends State<MusicPage> {
                         ['descriptionMusic'],
                     musicUrl: snapshot.data!.docs[index]['musicUrl'],
                     imgUrlMusic: snapshot.data!.docs[index]['imgUrlMusic'],
+                    date: snapshot.data!.docs[index]['date'],
+                  time: snapshot.data!.docs[index]['time'],
                   );
                 },
               );
@@ -110,6 +112,8 @@ class BlogsTile extends StatelessWidget {
       titleMusic,
       descriptionMusic,
       musicUrl,
+      date,
+      time,
       docIdMusic,
       authorID;
   BlogsTile({
@@ -120,6 +124,8 @@ class BlogsTile extends StatelessWidget {
     required this.authorID,
     required this.musicUrl,
     required this.docIdMusic,
+    required this.date,
+    required this.time,
   });
 
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -248,6 +254,22 @@ class BlogsTile extends StatelessWidget {
                           color: Colors.black,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                          'Дата создания: $date',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Время создания: $time',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
                       const SizedBox(height: 10),
                       FutureBuilder(
                         future: FirebaseFirestore.instance

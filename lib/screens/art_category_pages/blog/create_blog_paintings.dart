@@ -21,6 +21,8 @@ class CreateBlogPaintingsState extends State<CreateBlogPaintings> {
   String authorNamePaintings = '';
   String titlePaintings = '';
   String descriptionPaintings = '';
+    String date = ''; // Add this line
+  String time = ''; // Add this line
 
   XFile? selectedImagePaintings;
   bool isLoadingPaintings = false;
@@ -42,6 +44,11 @@ class CreateBlogPaintingsState extends State<CreateBlogPaintings> {
       setState(() {
         isLoadingPaintings = true;
       });
+
+      // Get current date and time
+      DateTime now = DateTime.now();
+      date = "${now.year}-${now.month}-${now.day}";
+      time = "${now.hour}:${now.minute}:${now.second}";
       //uploading image to firebase storage
       Reference firebasStorageRef = FirebaseStorage.instance
           .ref()
@@ -63,6 +70,8 @@ class CreateBlogPaintingsState extends State<CreateBlogPaintings> {
         'titlePaintings': titlePaintings,
         'descriptionPaintings': descriptionPaintings,
         'authorID': FirebaseAuth.instance.currentUser!.uid,
+        'date': date, // Add this line
+        'time': time, // Add this line
       };
 
       crudMethodsPaintings.addData(blogMap).then((resultPaintings) {

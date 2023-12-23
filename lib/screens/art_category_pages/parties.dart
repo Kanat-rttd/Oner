@@ -35,22 +35,23 @@ class _PartiesPageState extends State<PartiesPage> {
         } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Text('Нет доступных блогов.');
         } else {
-          return 
-              ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: snapshot.data!.docs.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return BlogsTile(
-                    docIdParties: snapshot.data!.docs[index].id,
-                    authorID: snapshot.data!.docs[index]['authorID'],
-                    titleParties: snapshot.data!.docs[index]['titleParties'],
-                    descriptionParties: snapshot.data!.docs[index]
-                        ['descriptionParties'],
-                    imgUrlParties: snapshot.data!.docs[index]['imgUrlParties'],
-                  );
-                },
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: snapshot.data!.docs.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return BlogsTile(
+                docIdParties: snapshot.data!.docs[index].id,
+                authorID: snapshot.data!.docs[index]['authorID'],
+                titleParties: snapshot.data!.docs[index]['titleParties'],
+                descriptionParties: snapshot.data!.docs[index]
+                    ['descriptionParties'],
+                imgUrlParties: snapshot.data!.docs[index]['imgUrlParties'],
+                date: snapshot.data!.docs[index]['date'],
+                time: snapshot.data!.docs[index]['time'],
               );
+            },
+          );
         }
       },
     );
@@ -106,6 +107,8 @@ class BlogsTile extends StatelessWidget {
   final String imgUrlParties,
       titleParties,
       descriptionParties,
+      date,
+      time,
       docIdParties,
       authorID;
   BlogsTile({
@@ -115,6 +118,8 @@ class BlogsTile extends StatelessWidget {
     required this.descriptionParties,
     required this.authorID,
     required this.docIdParties,
+    required this.date,
+    required this.time,
   });
 
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -169,7 +174,7 @@ class BlogsTile extends StatelessWidget {
                         ),
                       ),
                       // IconButton for navigating to chat page
-                       if (!isCurrentUserAuthor)
+                      if (!isCurrentUserAuthor)
                         Positioned(
                           top: 8,
                           right: 8,
@@ -230,6 +235,22 @@ class BlogsTile extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Автор: ${authorNameParties}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Дата создания: $date',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Время создания: $time',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,

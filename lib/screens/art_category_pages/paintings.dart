@@ -51,6 +51,8 @@ class _PaintingsPageState extends State<PaintingsPage> {
                         ['descriptionPaintings'],
                     imgUrlPaintings: snapshot.data!.docs[index]
                         ['imgUrlPaintings'],
+                    date: snapshot.data!.docs[index]['date'],
+                    time: snapshot.data!.docs[index]['time'],
                   );
                 },
               )
@@ -112,6 +114,8 @@ class BlogsTile extends StatelessWidget {
       titlePaintings,
       descriptionPaintings,
       docIdPaintings,
+      date,
+      time,
       authorID;
   BlogsTile({
     super.key,
@@ -120,6 +124,8 @@ class BlogsTile extends StatelessWidget {
     required this.descriptionPaintings,
     required this.authorID,
     required this.docIdPaintings,
+    required this.date,
+    required this.time,
   });
 
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -174,7 +180,7 @@ class BlogsTile extends StatelessWidget {
                         ),
                       ),
                       // IconButton for navigating to chat page
-                       if (!isCurrentUserAuthor)
+                      if (!isCurrentUserAuthor)
                         Positioned(
                           top: 8,
                           right: 8,
@@ -235,6 +241,22 @@ class BlogsTile extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Автор: ${authorNamePaintings}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Дата создания: $date',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Время создания: $time',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,

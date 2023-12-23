@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CrudMethodsFilms {
   Future<void> addData(blogData) async {
+    // blogData['createdAt'] = FieldValue.serverTimestamp(); // Add this line
     FirebaseFirestore.instance.collection('blogs_films').add(blogData).catchError((e) {return e;});
   }
 
