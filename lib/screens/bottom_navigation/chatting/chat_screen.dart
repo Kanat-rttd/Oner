@@ -6,13 +6,14 @@ import 'package:oner/additional/textfield.dart';
 import 'package:oner/screens/bottom_navigation/chatting/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
-  final String recieverUserEmail;
   final String recieverUserID;
+  final String recieverUserEmail;
+
   const ChatPage({
-    super.key,
-    required this.recieverUserEmail,
+    Key? key,
     required this.recieverUserID,
-  });
+    required this.recieverUserEmail,
+  }) : super(key: key);
 
   @override
   State<ChatPage> createState() => ChatPageState();
@@ -22,22 +23,84 @@ class ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final TextEditingController _replyController = TextEditingController();
+  String _userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('user_info')
+          .doc(widget.recieverUserID)
+          .get();
+
+      Map<String, dynamic> userData =
+          userSnapshot.data() as Map<String, dynamic>;
+
+      String firstName = userData['firstName'];
+      String lastName = userData['lastName'];
+
+      setState(() {
+        _userName = '$firstName $lastName';
+      });
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
+  }
 
   void replyToMessage(
       String messageId, String senderEmail, String originalMessage) {
-    // Implement your reply logic here
-    print('Replying to message with ID: $messageId');
-    print('Sender: $senderEmail');
-    print('Original Message: $originalMessage');
-    // You can open a reply input or navigate to a new screen for the reply
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Reply to $senderEmail'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Original Message: $originalMessage'),
+              TextField(
+                controller: _replyController,
+                decoration: InputDecoration(labelText: 'Type your reply'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Закрыть диалог
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                String replyMessage = _replyController.text;
+
+                await _chatService.sendMessage(
+                  widget.recieverUserID,
+                  replyMessage,
+                  replyToMessageId: messageId,
+                );
+
+                Navigator.of(context).pop(); // Закрыть диалог
+              },
+              child: Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void sendMessage() async {
-    //only send message if there is something to send
     if (_messageController.text.isNotEmpty) {
       await _chatService.sendMessage(
           widget.recieverUserID, _messageController.text);
-      //clear the text controller after sending message
       _messageController.clear();
     }
   }
@@ -45,24 +108,19 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.recieverUserEmail)),
+      appBar: AppBar(title: Text(_userName)),
       body: Column(
         children: [
-          //messages
           Expanded(
             child: _buildMessageList(),
           ),
-
-          //user input
           _builMessageInput(),
-
           const SizedBox(height: 25),
         ],
       ),
     );
   }
 
-  //build message list
   Widget _buildMessageList() {
     return StreamBuilder(
       stream: _chatService.getMessages(
@@ -85,7 +143,6 @@ class ChatPageState extends State<ChatPage> {
     );
   }
 
-  //build message item
   Widget _buildMessageItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
@@ -94,11 +151,11 @@ class ChatPageState extends State<ChatPage> {
         : Alignment.centerLeft;
 
     return Dismissible(
-      key: UniqueKey(), // Use UniqueKey for each Dismissible
+      key: UniqueKey(),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        color: Colors.green, // Customize swipe background color
+        color: Colors.green,
         child: Padding(
           padding: const EdgeInsets.only(right: 16.0),
           child: Icon(
@@ -108,7 +165,6 @@ class ChatPageState extends State<ChatPage> {
         ),
       ),
       onDismissed: (direction) {
-        // Handle swipe action (reply)
         replyToMessage(
           document.id,
           data['senderEmail'],
@@ -117,7 +173,6 @@ class ChatPageState extends State<ChatPage> {
       },
       child: GestureDetector(
         onLongPress: () {
-          // Handle long-press action (reply)
           replyToMessage(
             document.id,
             data['senderEmail'],
@@ -136,7 +191,7 @@ class ChatPageState extends State<ChatPage> {
                     ? MainAxisAlignment.end
                     : MainAxisAlignment.start,
             children: [
-              Text(data['senderEmail']),
+              Text(_userName),
               const SizedBox(height: 5),
               ChatBubble(
                 message: data['message'],
@@ -149,7 +204,6 @@ class ChatPageState extends State<ChatPage> {
     );
   }
 
-// Format timestamp to display time
   String _formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
     String formattedTime =
@@ -157,21 +211,17 @@ class ChatPageState extends State<ChatPage> {
     return formattedTime;
   }
 
-  //build message input
   Widget _builMessageInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: Row(
         children: [
-          //textfield
           Expanded(
             child: MyTextField(
                 controller: _messageController,
                 hintText: 'Enter message',
                 obscureText: false),
           ),
-
-          //send button
           IconButton(
             onPressed: sendMessage,
             icon: const Icon(

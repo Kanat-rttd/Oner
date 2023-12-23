@@ -3,13 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/bottom_navigation/chatting/message.dart';
 
-
 class ChatService extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   //SEND MESSAGES
-  Future<void> sendMessage(String recieverID, String message) async {
+  Future<void> sendMessage(String recieverID, String message,
+      {String? replyToMessageId}) async {
     //get current user info
     final String currentUserID = _firebaseAuth.currentUser!.uid;
     final String currentUserEmail = _firebaseAuth.currentUser!.email.toString();
@@ -17,26 +17,27 @@ class ChatService extends ChangeNotifier {
 
     //create a new message
     Message newMessage = Message(
-      senderID: currentUserID, 
-      senderEmail: currentUserEmail, 
-      recieverID: recieverID, 
-      message: message, 
-      timestamp: timestamp
-      );
+      senderID: currentUserID,
+      senderEmail: currentUserEmail,
+      recieverID: recieverID,
+      message: message,
+      timestamp: timestamp,
+      replyToMessageId: replyToMessageId,
+    );
 
     //construct chat room id from current user id and reciever id (sorted to ensure uniquness)
     List<String> ids = [currentUserID, recieverID];
     ids.sort(); //sort the ids to always have the same id for two people
-    String chatRoomID = ids.join(
-      "_" // combine the ids into a single string to use as a chatRoomID
-    );
+    String chatRoomID = ids
+        .join("_" // combine the ids into a single string to use as a chatRoomID
+            );
 
     //add new message to database
     await _firestore
-    .collection('chat_rooms')
-    .doc(chatRoomID)
-    .collection('messages')
-    .add(newMessage.toMap());
+        .collection('chat_rooms')
+        .doc(chatRoomID)
+        .collection('messages')
+        .add(newMessage.toMap());
   }
 
   //GET MESSAGES
@@ -47,10 +48,10 @@ class ChatService extends ChangeNotifier {
     String chatRoomID = ids.join("_");
 
     return _firestore
-      .collection('chat_rooms')
-      .doc(chatRoomID)
-      .collection('messages')
-      .orderBy('timestamp', descending: false)
-      .snapshots();
+        .collection('chat_rooms')
+        .doc(chatRoomID)
+        .collection('messages')
+        .orderBy('timestamp', descending: false)
+        .snapshots();
   }
 }

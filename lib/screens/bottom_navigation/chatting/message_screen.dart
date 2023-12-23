@@ -29,22 +29,24 @@ class _MessageScreenState extends State<MessageScreen> {
         final List<String> usersWithChats = [];
 
         snapshot.data!.docs.forEach((doc) {
-          Map<String, dynamic> data = doc.data()as Map<String, dynamic>;
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
           final String userEmail = data['email'];
           final String userID = data['uid'];
+          final String userName = '${data['firstName']} ${data['lastName']}';
 
           if (_auth.currentUser!.email != userEmail) {
             usersWithChats.add(userID);
 
             userListItems.add(
               ListTile(
-                title: Text(userEmail),
+                title: Text(userName), // Используем имя и фамилию вместо email
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatPage(
-                        recieverUserEmail: userEmail,
+                        recieverUserEmail:
+                            userName, // Используем имя и фамилию вместо email
                         recieverUserID: userID,
                       ),
                     ),

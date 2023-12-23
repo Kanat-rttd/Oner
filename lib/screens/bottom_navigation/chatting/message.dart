@@ -6,13 +6,14 @@ class Message {
   final String recieverID;
   final String message;
   final Timestamp timestamp;
-
+  final String? replyToMessageId;
   Message({
     required this.senderID,
     required this.senderEmail,
     required this.recieverID,
     required this.message,
     required this.timestamp,
+    this.replyToMessageId,
   });
 
   //convert to a map
@@ -23,6 +24,7 @@ class Message {
       'recieverID': recieverID,
       'message': message,
       'timestamp': timestamp,
+      'replyToMessageId': replyToMessageId,
     };
   }
 }
