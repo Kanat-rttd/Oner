@@ -1,6 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:oner/additional/chat_bubble.dart';
 import 'package:oner/additional/textfield.dart';
 import 'package:oner/screens/bottom_navigation/chatting/chat_service.dart';
@@ -107,10 +108,25 @@ class ChatPageState extends State<ChatPage> {
     }
   }
 
+  Future<String> _getAvatarURL(String userID) async {
+    try {
+      final storageReference =
+          FirebaseStorage.instance.ref().child('avatars/avatar_$userID.jpg');
+      final downloadUrl = await storageReference.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error loading avatar from Firebase Storage: $e');
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.recieverUserEmail)),
+      appBar: AppBar(
+        title: Text(widget.recieverUserEmail),
+        backgroundColor: Colors.blue, // Customize the app bar color
+      ),
       body: Column(
         children: [
           Expanded(
@@ -149,8 +165,8 @@ class ChatPageState extends State<ChatPage> {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
     var alignment = (data['senderID'] == _firebaseAuth.currentUser!.uid)
-        ? Alignment.centerRight
-        : Alignment.centerLeft;
+        ? MainAxisAlignment.end
+        : MainAxisAlignment.start;
 
     String senderName = (data['senderID'] == _firebaseAuth.currentUser!.uid)
         ? 'You'
@@ -177,34 +193,50 @@ class ChatPageState extends State<ChatPage> {
           data['message'],
         );
       },
-      child: GestureDetector(
-        onLongPress: () {
-          replyToMessage(
-            document.id,
-            data['senderEmail'],
-            data['message'],
-          );
-        },
-        child: Container(
-          alignment: alignment,
-          child: Column(
-            crossAxisAlignment:
-                (data['senderID'] == _firebaseAuth.currentUser!.uid)
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
-            mainAxisAlignment:
-                (data['senderID'] == _firebaseAuth.currentUser!.uid)
-                    ? MainAxisAlignment.end
-                    : MainAxisAlignment.start,
-            children: [
-              Text(senderName),
-              const SizedBox(height: 5),
-              ChatBubble(
-                message: data['message'],
-                time: _formatTimestamp(data['timestamp']),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        child: Row(
+          mainAxisAlignment: alignment,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (alignment == MainAxisAlignment.start)
+              FutureBuilder<String>(
+                future: _getAvatarURL(data['senderID']),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircleAvatar();
+                  } else {
+                    final avatarUrl = snapshot.data ?? '';
+                    return CircleAvatar(
+                      radius: 20,
+                      backgroundImage: avatarUrl.isNotEmpty
+                          ? NetworkImage(avatarUrl)
+                          : const AssetImage('assets/default-avatar.png')
+                              as ImageProvider<Object>,
+                    );
+                  }
+                },
               ),
-            ],
-          ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: (alignment == MainAxisAlignment.start)
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    senderName,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  ChatBubble(
+                    message: data['message'],
+                    time: _formatTimestamp(data['timestamp']),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -224,15 +256,17 @@ class ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: MyTextField(
-                controller: _messageController,
-                hintText: 'Enter message',
-                obscureText: false),
+              controller: _messageController,
+              hintText: 'Enter message',
+              obscureText: false,
+            ),
           ),
           IconButton(
             onPressed: sendMessage,
             icon: const Icon(
-              Icons.arrow_upward,
-              size: 40,
+              Icons.send,
+              size: 30,
+              color: Colors.blue, // Customize the send button color
             ),
           ),
         ],

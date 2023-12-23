@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:oner/screens/bottom_navigation/chatting/chat_screen.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -13,6 +13,7 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  Map<String, int> unreadMessagesCount = {};
 
   Widget _buildUserList() {
     return StreamBuilder(
@@ -37,6 +38,8 @@ class _MessageScreenState extends State<MessageScreen> {
 
           if (_auth.currentUser!.email != userEmail) {
             usersWithChats.add(userID);
+
+            int unreadCount = unreadMessagesCount[userID] ?? 0;
 
             userListItems.add(
               ListTile(
@@ -67,7 +70,23 @@ class _MessageScreenState extends State<MessageScreen> {
                       ),
                     ),
                   );
+                  setState(() {
+                    unreadMessagesCount[userID] = 0;
+                  });
                 },
+                trailing: unreadCount > 0
+                    ? CircleAvatar(
+                        backgroundColor: Colors.red,
+                        radius: 10,
+                        child: Text(
+                          unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    : null,
               ),
             );
           }
@@ -89,7 +108,6 @@ class _MessageScreenState extends State<MessageScreen> {
       final downloadUrl = await storageReference.getDownloadURL();
       return downloadUrl;
     } catch (e) {
-      // Если возникла ошибка (например, изображение не найдено), вернем пустую строку
       print('Ошибка при загрузке изображения из Firebase Storage: $e');
       return '';
     }
