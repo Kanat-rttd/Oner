@@ -14,6 +14,7 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   Map<String, int> unreadMessagesCount = {};
+  Map<String, String> lastMessagesContent = {};
 
   Widget _buildUserList() {
     return StreamBuilder(
@@ -44,6 +45,7 @@ class _MessageScreenState extends State<MessageScreen> {
             userListItems.add(
               ListTile(
                 title: Text(userName),
+                subtitle: _buildLastMessageContent(userID),
                 leading: FutureBuilder<String>(
                   future: _getAvatarURL(userID),
                   builder: (context, snapshot) {
@@ -74,19 +76,17 @@ class _MessageScreenState extends State<MessageScreen> {
                     unreadMessagesCount[userID] = 0;
                   });
                 },
-                trailing: unreadCount > 0
-                    ? CircleAvatar(
-                        backgroundColor: Colors.red,
-                        radius: 10,
-                        child: Text(
-                          unreadCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
-                        ),
-                      )
-                    : null,
+                trailing: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (unreadCount > 0)
+                      Text(
+                        'Новых сообщений: $unreadCount',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    _buildLastMessageTime(userID),
+                  ],
+                ),
               ),
             );
           }
@@ -99,6 +99,75 @@ class _MessageScreenState extends State<MessageScreen> {
         }
       },
     );
+  }
+
+  Widget _buildLastMessageTime(String userID) {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('chat_rooms')
+          .doc(_getChatRoomID(userID))
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError || !snapshot.hasData) {
+          return const Text('Ошибка');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text('Загрузка...');
+        }
+
+        final List<QueryDocumentSnapshot> messages = snapshot.data!.docs;
+
+        if (messages.isNotEmpty) {
+          final Timestamp lastMessageTimestamp = messages.first['timestamp'];
+          final DateTime lastMessageDateTime = lastMessageTimestamp.toDate();
+          final String formattedTime =
+              '${lastMessageDateTime.hour}:${lastMessageDateTime.minute.toString().padLeft(2, '0')}';
+          return Text(' $formattedTime');
+        } else {
+          return const SizedBox(); // Пустой виджет, если сообщений нет
+        }
+      },
+    );
+  }
+
+  Widget _buildLastMessageContent(String userID) {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('chat_rooms')
+          .doc(_getChatRoomID(userID))
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError || !snapshot.hasData) {
+          return const Text('Ошибка');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text('Загрузка...');
+        }
+
+        final List<QueryDocumentSnapshot> messages = snapshot.data!.docs;
+
+        if (messages.isNotEmpty) {
+          final String lastMessageContent = messages.first['message'];
+          return Text(' $lastMessageContent');
+        } else {
+          return const SizedBox(); // Пустой виджет, если сообщений нет
+        }
+      },
+    );
+  }
+
+  String _getChatRoomID(String otherUserID) {
+    List<String> ids = [_auth.currentUser!.uid, otherUserID];
+    ids.sort();
+    return ids.join('_');
   }
 
   Future<String> _getAvatarURL(String userID) async {

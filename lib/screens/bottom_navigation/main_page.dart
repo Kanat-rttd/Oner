@@ -64,10 +64,10 @@ class MainPage extends StatelessWidget {
           ),
         ),
       ),
-      title: AnimatedTextWidget(
+      title: const AnimatedTextWidget(
         text: 'Твори историю искусства!',
-        textStyle: const TextStyle(color: Colors.white),
-        duration: const Duration(milliseconds: 500),
+        textStyle: TextStyle(color: Colors.white),
+        duration: Duration(milliseconds: 500),
       ),
       centerTitle: true, // Add this line to center the title.
     );
@@ -123,6 +123,14 @@ class MainPage extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.blue,
             borderRadius: BorderRadius.circular(10.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           padding: const EdgeInsets.all(10.0),
           child: Icon(
@@ -143,13 +151,14 @@ class AnimatedTextWidget extends StatefulWidget {
   final TextStyle textStyle;
   final Duration duration;
 
-  AnimatedTextWidget({
+  const AnimatedTextWidget({
     required this.text,
     required this.textStyle,
     required this.duration,
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _AnimatedTextWidgetState createState() => _AnimatedTextWidgetState();
 }
 
