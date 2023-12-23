@@ -59,14 +59,14 @@ class ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Reply to $senderEmail'),
+          title: Text('Ответ к $senderEmail'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Original Message: $originalMessage'),
+              Text('Сообщение: $originalMessage'),
               TextField(
                 controller: _replyController,
-                decoration: InputDecoration(labelText: 'Type your reply'),
+                decoration: const InputDecoration(labelText: 'Ваш ответ'),
               ),
             ],
           ),
@@ -75,7 +75,7 @@ class ChatPageState extends State<ChatPage> {
               onPressed: () {
                 Navigator.of(context).pop(); // Закрыть диалог
               },
-              child: Text('Cancel'),
+              child: const Text('Отменить'),
             ),
             TextButton(
               onPressed: () async {
@@ -87,9 +87,10 @@ class ChatPageState extends State<ChatPage> {
                   replyToMessageId: messageId,
                 );
 
+                // ignore: use_build_context_synchronously
                 Navigator.of(context).pop(); // Закрыть диалог
               },
-              child: Text('Send'),
+              child: const Text('Ответить'),
             ),
           ],
         );
@@ -108,7 +109,7 @@ class ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_userName)),
+      appBar: AppBar(title: Text(widget.recieverUserEmail)),
       body: Column(
         children: [
           Expanded(
@@ -150,14 +151,18 @@ class ChatPageState extends State<ChatPage> {
         ? Alignment.centerRight
         : Alignment.centerLeft;
 
+    String senderName = (data['senderID'] == _firebaseAuth.currentUser!.uid)
+        ? 'You'
+        : widget.recieverUserEmail;
+
     return Dismissible(
       key: UniqueKey(),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         color: Colors.green,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 16.0),
+        child: const Padding(
+          padding: EdgeInsets.only(right: 16.0),
           child: Icon(
             Icons.reply,
             color: Colors.white,
@@ -191,7 +196,7 @@ class ChatPageState extends State<ChatPage> {
                     ? MainAxisAlignment.end
                     : MainAxisAlignment.start,
             children: [
-              Text(_userName),
+              Text(senderName),
               const SizedBox(height: 5),
               ChatBubble(
                 message: data['message'],
