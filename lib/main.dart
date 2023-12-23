@@ -19,6 +19,7 @@ import 'package:oner/auth/signup_screen.dart';
 import 'package:oner/auth/reset_password_screen.dart';
 import 'package:oner/auth/verify_email_screen.dart';
 import 'package:oner/firebase/firebase_streem.dart';
+import 'package:oner/screens/first_page.dart';
 
 import 'package:provider/provider.dart';
 
@@ -68,13 +69,14 @@ class MyApp extends StatelessWidget {
           '/films': (context) => const FilmsPage(),
           '/editProfile': (context) => const ProfileEditPage(),
           '/myPostsFilms': (context) => const MyPostsFilmsScreen(),
-          '/myPostsMusic':(context) => const MyPostsMusicScreen(),
-          '/myPostsPaintings':(context) => const MyPostsPaintingsScreen(),
-          '/myPostsParties':(context) => const MyPostsPartiesScreen(),
+          '/myPostsMusic': (context) => const MyPostsMusicScreen(),
+          '/myPostsPaintings': (context) => const MyPostsPaintingsScreen(),
+          '/myPostsParties': (context) => const MyPostsPartiesScreen(),
           '/helpPage': (context) => const HelpPage(),
-          '/myPosts':(context) => const MyPostsScreen(),
+          '/myPosts': (context) => const MyPostsScreen(),
+          '/first_page': (context) => const FirstPage(),
         },
-        initialRoute: '/',
+        initialRoute: '/first_page',
       ),
     );
   }
