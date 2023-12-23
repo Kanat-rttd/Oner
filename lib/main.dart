@@ -4,7 +4,11 @@ import 'package:oner/screens/bottom_navigation/my_page_screen/edit_profile.dart'
 import 'package:oner/provider/avatar_provider.dart';
 import 'package:oner/screens/bottom_navigation/my_page_screen/account_screen.dart';
 import 'package:oner/screens/bottom_navigation/my_page_screen/help.dart';
-import 'package:oner/screens/bottom_navigation/my_page_screen/my_posts.dart';
+import 'package:oner/screens/bottom_navigation/my_page_screen/my_posts/my_posts.dart';
+import 'package:oner/screens/bottom_navigation/my_page_screen/my_posts/my_posts_films.dart';
+import 'package:oner/screens/bottom_navigation/my_page_screen/my_posts/my_posts_music.dart';
+import 'package:oner/screens/bottom_navigation/my_page_screen/my_posts/my_posts_paintings.dart';
+import 'package:oner/screens/bottom_navigation/my_page_screen/my_posts/my_posts_parties.dart';
 import 'package:oner/screens/bottom_navigation/home_screen.dart';
 import 'package:oner/auth/login_screen.dart';
 import 'package:oner/screens/art_category_pages/music.dart';
@@ -15,6 +19,7 @@ import 'package:oner/auth/signup_screen.dart';
 import 'package:oner/auth/reset_password_screen.dart';
 import 'package:oner/auth/verify_email_screen.dart';
 import 'package:oner/firebase/firebase_streem.dart';
+
 import 'package:provider/provider.dart';
 
 import 'firebase/firebase_options.dart';
@@ -62,8 +67,12 @@ class MyApp extends StatelessWidget {
           '/paintings': (context) => const PaintingsPage(),
           '/films': (context) => const FilmsPage(),
           '/editProfile': (context) => const ProfileEditPage(),
-          '/myPosts': (context) => const MyPostsScreen(),
+          '/myPostsFilms': (context) => const MyPostsFilmsScreen(),
+          '/myPostsMusic':(context) => const MyPostsMusicScreen(),
+          '/myPostsPaintings':(context) => const MyPostsPaintingsScreen(),
+          '/myPostsParties':(context) => const MyPostsPartiesScreen(),
           '/helpPage': (context) => const HelpPage(),
+          '/myPosts':(context) => const MyPostsScreen(),
         },
         initialRoute: '/',
       ),

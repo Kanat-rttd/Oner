@@ -244,18 +244,7 @@ class BlogsTile extends StatelessWidget {
                               },
                             ),
                           ),
-                        if (isCurrentUserAuthor)
-                          Positioned(
-                            top: 8,
-                            left: 8,
-                            child: IconButton(
-                              icon: Icon(Icons.edit),
-                              onPressed: () {
-                                // Call the method to navigate to the blog creation page for editing
-                                navigateToEditPost(this);
-                              },
-                            ),
-                          ),  
+                          
                       ],
                     ),
                   ),

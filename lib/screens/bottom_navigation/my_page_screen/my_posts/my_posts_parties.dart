@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class MyPostsScreen extends StatefulWidget {
-  const MyPostsScreen({Key? key}) : super(key: key);
+class MyPostsPartiesScreen extends StatefulWidget {
+  const MyPostsPartiesScreen({Key? key}) : super(key: key);
 
   @override
-  State<MyPostsScreen> createState() => _MyPostsScreenState();
+  State<MyPostsPartiesScreen> createState() => _MyPostsPartiesScreenState();
 }
 
-class _MyPostsScreenState extends State<MyPostsScreen> {
+class _MyPostsPartiesScreenState extends State<MyPostsPartiesScreen> {
   final currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Мои посты'),
+        title: const Text('Мои посты в разделе Праздников'),
         centerTitle: true,
       ),
       body: Padding(
@@ -41,9 +41,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                   return BlogsTile(
                     docId: posts[index].id,
                     authorID: post['authorID'],
-                    titleFilms: post['titleFilms'],
-                    descriptionFilms: post['descriptionFilms'],
-                    imgUrlFilms: post['imgUrlFilms'],
+                    titleParties: post['titleParties'],
+                    descriptionParties: post['descriptionParties'],
+                    imgUrlParties: post['imgUrlParties'],
                   );
                 },
               );
@@ -58,7 +58,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
     if (currentUser != null) {
       try {
         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('blogs_films')
+            .collection('blogs_parties')
             .where('authorID', isEqualTo: currentUser!.uid)
             .get();
 
@@ -74,13 +74,13 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
 }
 
 class BlogsTile extends StatelessWidget {
-  final String imgUrlFilms, titleFilms, descriptionFilms, docId, authorID;
+  final String imgUrlParties, titleParties, descriptionParties, docId, authorID;
 
   BlogsTile({
     required this.docId,
-    required this.imgUrlFilms,
-    required this.titleFilms,
-    required this.descriptionFilms,
+    required this.imgUrlParties,
+    required this.titleParties,
+    required this.descriptionParties,
     required this.authorID,
   });
 
@@ -110,7 +110,7 @@ class BlogsTile extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.network(
-                      imgUrlFilms,
+                      imgUrlParties,
                       width: MediaQuery.of(context).size.width,
                       height: 300,
                       fit: BoxFit.cover,
@@ -140,7 +140,7 @@ class BlogsTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    titleFilms,
+                    titleParties,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -149,7 +149,7 @@ class BlogsTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    descriptionFilms,
+                    descriptionParties,
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black,
