@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:oner/screens/bottom_navigation/chatting/chat_screen.dart';
 
@@ -18,11 +19,11 @@ class _MessageScreenState extends State<MessageScreen> {
       stream: FirebaseFirestore.instance.collection('user_info').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text('Error');
+          return const Text('Ошибка');
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Loading...');
+          return const Text('Загрузка...');
         }
 
         final List<Widget> userListItems = [];
@@ -39,14 +40,29 @@ class _MessageScreenState extends State<MessageScreen> {
 
             userListItems.add(
               ListTile(
-                title: Text(userName), // Используем имя и фамилию вместо email
+                title: Text(userName),
+                leading: FutureBuilder<String>(
+                  future: _getAvatarURL(userID),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircleAvatar();
+                    } else {
+                      final avatarUrl = snapshot.data ?? '';
+                      return CircleAvatar(
+                        backgroundImage: avatarUrl.isNotEmpty
+                            ? NetworkImage(avatarUrl)
+                            : const AssetImage('assets/default-avatar.png')
+                                as ImageProvider<Object>,
+                      );
+                    }
+                  },
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatPage(
-                        recieverUserEmail:
-                            userName, // Используем имя и фамилию вместо email
+                        recieverUserEmail: userName,
                         recieverUserID: userID,
                       ),
                     ),
@@ -64,6 +80,19 @@ class _MessageScreenState extends State<MessageScreen> {
         }
       },
     );
+  }
+
+  Future<String> _getAvatarURL(String userID) async {
+    try {
+      final storageReference =
+          FirebaseStorage.instance.ref().child('avatars/avatar_$userID.jpg');
+      final downloadUrl = await storageReference.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      // Если возникла ошибка (например, изображение не найдено), вернем пустую строку
+      print('Ошибка при загрузке изображения из Firebase Storage: $e');
+      return '';
+    }
   }
 
   @override
