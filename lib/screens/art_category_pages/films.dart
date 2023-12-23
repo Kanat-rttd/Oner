@@ -24,40 +24,38 @@ class _FilmsPageState extends State<FilmsPage> {
     blogsFutureFilms = crudMethodsFilms.getData();
   }
 
-  Widget blogListFilms() {
-    return FutureBuilder(
-      future: blogsFutureFilms,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Ошибка при получении данных: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Text('Нет доступных блогов.');
-        } else {
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: snapshot.data!.docs.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return BlogsTile(
-                docId: snapshot.data!.docs[index].id,
-                authorID: snapshot.data!.docs[index]['authorID'],
-                titleFilms: snapshot.data!.docs[index]['titleFilms'],
-                descriptionFilms: snapshot.data!.docs[index]
-                    ['descriptionFilms'],
-                filmUrl: snapshot.data!.docs[index]['filmUrl'],
-                imgUrlFilms: snapshot.data!.docs[index]['imgUrlFilms'],
-                date: snapshot.data!.docs[index]['date'],
-                time: snapshot.data!.docs[index]['time'],
-              );
-            },
-          );
-        }
-      },
-    );
-  }
-
+ Widget blogListFilms() {
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance.collection('blogs_films').snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return CircularProgressIndicator();
+      } else if (snapshot.hasError) {
+        return Text('Error: ${snapshot.error}');
+      } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Text('No available blogs.');
+      } else {
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: snapshot.data!.docs.length,
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            return BlogsTile(
+              docId: snapshot.data!.docs[index].id,
+              authorID: snapshot.data!.docs[index]['authorID'],
+              titleFilms: snapshot.data!.docs[index]['titleFilms'],
+              descriptionFilms: snapshot.data!.docs[index]['descriptionFilms'],
+              filmUrl: snapshot.data!.docs[index]['filmUrl'],
+              imgUrlFilms: snapshot.data!.docs[index]['imgUrlFilms'],
+              date: snapshot.data!.docs[index]['date'],
+              time: snapshot.data!.docs[index]['time'],
+            );
+          },
+        );
+      }
+    },
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,6 +127,97 @@ class BlogsTile extends StatelessWidget {
 
   final currentUser = FirebaseAuth.instance.currentUser!;
 
+  void _editPostFields(BuildContext context) async {
+    String newTitle = titleFilms;
+    String newDescription = descriptionFilms;
+    String newFilmUrl = filmUrl;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Изменить данные поста',
+          style: TextStyle(color: Colors.black),
+        ),
+        content: Container(
+          width: double.maxFinite,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Нзавание',
+                ),
+                onChanged: (value) {
+                  newTitle = value;
+                },
+              ),
+              TextField(
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Описание',
+                ),
+                onChanged: (value) {
+                  newDescription = value;
+                },
+              ),
+              TextField(
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Ссылка',
+                ),
+                onChanged: (value) {
+                  newFilmUrl = value;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Отмена',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // Save the edited values to Firestore
+              _saveEditedValues(newTitle, newDescription, newFilmUrl);
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Сохранить',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _saveEditedValues(
+      String newTitle, String newDescription, String newFilmUrl) async {
+    // Update Firestore document with new values
+    await FirebaseFirestore.instance
+        .collection('blogs_films')
+        .doc(docId)
+        .update({
+      'titleFilms': newTitle,
+      'descriptionFilms': newDescription,
+      'filmUrl': newFilmUrl,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -199,6 +288,19 @@ class BlogsTile extends StatelessWidget {
                             },
                           ),
                         ),
+
+                      // editing icon
+
+                      if (isCurrentUserAuthor)
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            // Call function to edit post fields
+                            _editPostFields(context);
+                          },
+                        ),
+
+                      //
                     ],
                   ),
                 ),

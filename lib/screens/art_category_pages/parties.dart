@@ -25,37 +25,36 @@ class _PartiesPageState extends State<PartiesPage> {
   }
 
   Widget blogListParties() {
-    return FutureBuilder(
-      future: blogsFutureParties,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Ошибка при получении данных: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Text('Нет доступных блогов.');
-        } else {
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: snapshot.data!.docs.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return BlogsTile(
-                docIdParties: snapshot.data!.docs[index].id,
-                authorID: snapshot.data!.docs[index]['authorID'],
-                titleParties: snapshot.data!.docs[index]['titleParties'],
-                descriptionParties: snapshot.data!.docs[index]
-                    ['descriptionParties'],
-                imgUrlParties: snapshot.data!.docs[index]['imgUrlParties'],
-                date: snapshot.data!.docs[index]['date'],
-                time: snapshot.data!.docs[index]['time'],
-              );
-            },
-          );
-        }
-      },
-    );
-  }
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance.collection('blogs_parties').snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return CircularProgressIndicator();
+      } else if (snapshot.hasError) {
+        return Text('Error: ${snapshot.error}');
+      } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Text('No available blogs.');
+      } else {
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: snapshot.data!.docs.length,
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            return BlogsTile(
+              docIdParties: snapshot.data!.docs[index].id,
+              authorID: snapshot.data!.docs[index]['authorID'],
+              titleParties: snapshot.data!.docs[index]['titleParties'],
+              descriptionParties: snapshot.data!.docs[index]['descriptionParties'],
+              imgUrlParties: snapshot.data!.docs[index]['imgUrlParties'],
+              date: snapshot.data!.docs[index]['date'],
+              time: snapshot.data!.docs[index]['time'],
+            );
+          },
+        );
+      }
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +122,86 @@ class BlogsTile extends StatelessWidget {
   });
 
   final currentUser = FirebaseAuth.instance.currentUser!;
+
+  void _editPostFields(BuildContext context) async {
+    String newPartiesTitle = titleParties;
+    String newPartiesDescription = descriptionParties;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Изменить данные поста',
+          style: TextStyle(color: Colors.black),
+        ),
+        content: Container(
+          width: double.maxFinite,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Нзавание',
+                ),
+                onChanged: (value) {
+                  newPartiesTitle = value;
+                },
+              ),
+              TextField(
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Описание',
+                ),
+                onChanged: (value) {
+                  newPartiesDescription = value;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Отмена',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // Save the edited values to Firestore
+              _saveEditedValues(newPartiesTitle, newPartiesDescription);
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Сохранить',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _saveEditedValues(
+      String newPartiesTitle, String newPartiesDescription) async {
+    // Update Firestore document with new values
+    await FirebaseFirestore.instance
+        .collection('blogs_parties')
+        .doc(docIdParties)
+        .update({
+      'titleParties': newPartiesTitle,
+      'descriptionParties': newPartiesDescription,
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +273,18 @@ class BlogsTile extends StatelessWidget {
                             },
                           ),
                         ),
+                        // editing icon
+
+                      if (isCurrentUserAuthor)
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            // Call function to edit post fields
+                            _editPostFields(context);
+                          },
+                        ),
+
+                      //
                     ],
                   ),
                 ),
