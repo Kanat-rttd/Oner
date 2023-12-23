@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:oner/additional/chat_bubble.dart';
 import 'package:oner/additional/textfield.dart';
 import 'package:oner/screens/bottom_navigation/chatting/chat_service.dart';
 
@@ -75,7 +74,7 @@ class ChatPageState extends State<ChatPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Закрыть диалог
+                Navigator.of(context).pop();
               },
               child: const Text('Отменить'),
             ),
@@ -89,8 +88,7 @@ class ChatPageState extends State<ChatPage> {
                   replyToMessageId: messageId,
                 );
 
-                // ignore: use_build_context_synchronously
-                Navigator.of(context).pop(); // Закрыть диалог
+                Navigator.of(context).pop();
               },
               child: const Text('Ответить'),
             ),
@@ -125,12 +123,18 @@ class ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.recieverUserEmail),
-        backgroundColor: Colors.blue, // Customize the app bar color
+        backgroundColor: Colors.blue,
+        elevation: 0,
       ),
       body: Column(
         children: [
           Expanded(
-            child: _buildMessageList(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+              ),
+              child: _buildMessageList(),
+            ),
           ),
           _builMessageInput(),
           const SizedBox(height: 25),
@@ -167,10 +171,6 @@ class ChatPageState extends State<ChatPage> {
     var alignment = (data['senderID'] == _firebaseAuth.currentUser!.uid)
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
-
-    String senderName = (data['senderID'] == _firebaseAuth.currentUser!.uid)
-        ? 'You'
-        : widget.recieverUserEmail;
 
     return Dismissible(
       key: UniqueKey(),
@@ -224,14 +224,43 @@ class ChatPageState extends State<ChatPage> {
                     ? CrossAxisAlignment.start
                     : CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    senderName,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 5),
-                  ChatBubble(
-                    message: data['message'],
-                    time: _formatTimestamp(data['timestamp']),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 5),
+                    decoration: BoxDecoration(
+                      color: (alignment == MainAxisAlignment.start)
+                          ? Colors.white
+                          : Colors.blue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['message'],
+                          style: TextStyle(
+                            color: (alignment == MainAxisAlignment.start)
+                                ? Colors.black
+                                : Colors.white,
+                          ),
+                        ),
+                        Padding(
+                          padding: (data['message'].length < 20)
+                              ? const EdgeInsets.only(top: 5, right: 5)
+                              : const EdgeInsets.only(
+                                  top: 5, right: 5, bottom: 5),
+                          child: Text(
+                            _formatTimestamp(data['timestamp']),
+                            style: TextStyle(
+                              color: (alignment == MainAxisAlignment.start)
+                                  ? Colors.grey
+                                  : Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -251,13 +280,13 @@ class ChatPageState extends State<ChatPage> {
 
   Widget _builMessageInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           Expanded(
             child: MyTextField(
               controller: _messageController,
-              hintText: 'Enter message',
+              hintText: 'Введите сообщение',
               obscureText: false,
             ),
           ),
@@ -266,7 +295,7 @@ class ChatPageState extends State<ChatPage> {
             icon: const Icon(
               Icons.send,
               size: 30,
-              color: Colors.blue, // Customize the send button color
+              color: Colors.blue,
             ),
           ),
         ],
