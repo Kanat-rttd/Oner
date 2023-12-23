@@ -56,7 +56,8 @@ class MainPage extends StatelessWidget {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 0, 140, 255),
+              Colors.blue,
+              Colors.blue,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

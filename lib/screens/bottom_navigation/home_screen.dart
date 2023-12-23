@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
 
   void _navigateBottomBar(int index){
-    if (index == 2 && user == null) {
+    if ((index == 2 || index == 1) && user == null) {
       _showRegistrationDialog(context).then((_) {
         // Perform any additional actions after the dialog is closed
         setState(() {
@@ -73,12 +73,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _showRegistrationDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Хотите ли вы зарегистрироваться или войти?'),
-          actions: [
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Хотите ли вы зарегистрироваться или войти?'),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -94,9 +96,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text('Зарегистрироваться'),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }
 
