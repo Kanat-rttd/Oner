@@ -81,7 +81,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg
-    # - assets/icons8-camera-50.png
+    - assets/vangog.jpg
     - assets/photo-camera-svgrepo-com.svg
     - assets/user.svg
     - assets/settings.svg

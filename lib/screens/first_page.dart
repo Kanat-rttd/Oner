@@ -41,10 +41,9 @@ class FirstPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 80,
-                backgroundImage:
-                    const AssetImage('assets/VanGogh-starry_night.jpg'),
+                backgroundImage: AssetImage('assets/vangog.jpg'),
               ),
               const SizedBox(height: 30),
               _buildButton(context, 'Войти', const LoginScreen()),

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // import 'package:oner/message_screen.dart';
 // import 'package:oner/screens/home_screen.dart';
@@ -50,6 +51,36 @@ class MainPage extends StatelessWidget {
   //   );
   // }
 
+  Future<void> _showRegistrationDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Хотите ли вы зарегистрироваться или войти?'),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/login');
+                },
+                child: const Text('Войти'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/signup');
+                },
+                child: const Text('Зарегистрироваться'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   PreferredSizeWidget _buildAnimatedAppBar(BuildContext context) {
     return AppBar(
       flexibleSpace: Container(
@@ -81,14 +112,14 @@ class MainPage extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/music');
+                _navigateToPage(context, '/music');
               },
               child: _buildRoundedIcon(Icons.music_note, 'Музыка'),
             ),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/parties');
+                _navigateToPage(context, '/parties');
               },
               child: _buildRoundedIcon(Icons.cake, 'Праздник'),
             ),
@@ -99,14 +130,14 @@ class MainPage extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/paintings');
+                _navigateToPage(context, '/paintings');
               },
               child: _buildRoundedIcon(Icons.palette, 'Картины'),
             ),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/films');
+                _navigateToPage(context, '/films');
               },
               child: _buildRoundedIcon(Icons.movie, 'Кино'),
             ),
@@ -114,6 +145,16 @@ class MainPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _navigateToPage(BuildContext context, String route) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _showRegistrationDialog(context);
+    } else {
+      Navigator.pushNamed(context, route);
+    }
   }
 
   Widget _buildRoundedIcon(IconData icon, String label) {
